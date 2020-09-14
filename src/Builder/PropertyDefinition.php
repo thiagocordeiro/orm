@@ -32,7 +32,7 @@ class PropertyDefinition
         $this->nullable = $param->allowsNull();
         $this->type = $this->searchParamType($class, $param);
         $this->class = $this->getClassDefinitionByType(str_replace('[]', '', $this->type));
-        $this->getter = $this->searchParamGetter($class, $param, $this->type);
+        $this->getter = sprintf('%s()', $this->searchParamGetter($class, $param, $this->type));
     }
 
     public function getName(): string

@@ -2,7 +2,8 @@ create table addresses
 (
     id varchar not null,
     street varchar not null,
-    number varchar not null
+    number varchar not null,
+    created_at datetime not null
 );
 
 create table order_products

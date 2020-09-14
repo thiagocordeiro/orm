@@ -11,14 +11,14 @@ class Address
     private string $id;
     private string $street;
     private string $number;
-    private DateTimeImmutable $createAt;
+    private DateTimeImmutable $createdAt;
 
-    public function __construct(string $id, string $street, string $number, DateTimeImmutable $createAt)
+    public function __construct(string $id, string $street, string $number, DateTimeImmutable $createdAt)
     {
         $this->id = $id;
         $this->street = $street;
         $this->number = $number;
-        $this->createAt = $createAt;
+        $this->createdAt = $createdAt;
     }
 
     public function getId(): string
@@ -36,8 +36,8 @@ class Address
         return $this->number;
     }
 
-    public function getCreateAt(): DateTimeImmutable
+    public function getCreatedAt(): DateTimeImmutable
     {
-        return $this->createAt;
+        return $this->createdAt;
     }
 }

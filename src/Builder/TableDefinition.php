@@ -109,7 +109,7 @@ class TableDefinition
                     $property->getName(),
                     sprintf('%s_id', $property->getName()),
                     $property->getIdType(),
-                    $property->withGetter(sprintf('%s()->getId', $property->getGetter()))
+                    $property->withGetter(sprintf('%s->getId()', $property->getGetter()))
                 );
 
                 continue;
@@ -147,7 +147,7 @@ class TableDefinition
                     $voProperty->getName(),
                     $voProperty->getName(),
                     'datetime',
-                    $voProperty->withGetter(sprintf('%s()->%s', $voProperty->getGetter(), 'format(\'Y-m-d H:i:s.u\')')),
+                    $voProperty->withGetter(sprintf('%s->format(\'Y-m-d H:i:s.u\')', $voProperty->getGetter())),
                     $voProperty->getType()
                 ),
             ];
@@ -170,7 +170,7 @@ class TableDefinition
                     $voProperty->getName(),
                     $voProperty->getName(),
                     $prop->getType(),
-                    $voProperty->withGetter(sprintf('%s()->%s', $voProperty->getGetter(), $prop->getGetter())),
+                    $voProperty->withGetter(sprintf('%s->%s', $voProperty->getGetter(), $prop->getGetter())),
                     $voProperty->getType()
                 ),
             ];
@@ -181,7 +181,7 @@ class TableDefinition
                 $voProperty->getName(),
                 sprintf('%s_%s', $voProperty->getName(), $prop->getName()),
                 $prop->getType(),
-                $voProperty->withGetter(sprintf('%s()->%s', $voProperty->getGetter(), $prop->getGetter())),
+                $voProperty->withGetter(sprintf('%s->%s', $voProperty->getGetter(), $prop->getGetter())),
                 $voProperty->getType(),
             ),
             $properties
