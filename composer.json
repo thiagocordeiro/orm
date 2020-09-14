@@ -41,12 +41,12 @@
   "scripts": {
     "mutation": "vendor/bin/infection --threads=2 --min-msi=95 --ansi",
     "cs:check": "vendor/bin/phpcs --colors -ps",
-    "test:stan": "vendor/bin/phpstan analyse src --level=max --ansi",
+    "test:stan": "php -d memory_limit=-1 vendor/bin/phpstan analyse src --level=max --ansi",
     "test:int": "vendor/bin/phpunit --testdox --color=always",
     "tests": [
       "@cs:check",
       "@test:stan",
-      "@test:unit"
+      "@test:int"
     ]
   }
 }
