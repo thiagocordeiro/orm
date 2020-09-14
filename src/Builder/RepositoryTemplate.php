@@ -140,14 +140,20 @@ class RepositoryTemplate
      */
     protected function prepareMultiFields(array $objectField): string
     {
-        $fields = [];
+        $field = current($objectField);
+
+        $subFields = [];
         $voClass = current($objectField)->getValueObject();
 
-        foreach ($objectField as $field) {
-            $fields[] = sprintf("%s\$item['%s']", $field->getCast(), $field->getName());
+        foreach ($objectField as $subField) {
+            $subFields[] = sprintf("%s\$item['%s']", $subField->getCast(), $subField->getName());
         }
 
-        return sprintf("%snew \%s(%s)", str_repeat(' ', 12), $voClass, implode(', ', $fields));
+        return $this->prepareNullableArrayProperty(
+            $field,
+            $field->getName(),
+            sprintf("new \%s(%s)", $voClass, implode(', ', $subFields)),
+        );
     }
 
     /**
@@ -171,35 +177,48 @@ class RepositoryTemplate
         $valueObjectClass = $field->getValueObject();
 
         if ($field->isChild()) {
-            return sprintf(
-                "%s%s\$this->factory()->getRepository(\%s::class)->selectBy(['%s_id' => \$item['id']])",
-                str_repeat(' ', 12),
-                $field->getDefinition()->isVariadic() ? '...' : '',
-                str_replace('[]', '', $field->getDefinition()->getType()),
-                singularize($this->definition->getTableName())
+            return $this->prepareNullableArrayProperty(
+                $field,
+                'id',
+                sprintf(
+                    "%s\$this->factory()->getRepository(\%s::class)->selectBy(['%s_id' => \$item['id']])",
+                    $field->getDefinition()->isVariadic() ? '...' : '',
+                    str_replace('[]', '', $field->getDefinition()->getType()),
+                    singularize($this->definition->getTableName()),
+                )
             );
         }
 
         if ($field->getDefinition()->isEntity()) {
-            return sprintf(
-                "%s\$this->factory()->getRepository(\%s::class)->loadById(\$item['%s'])",
-                str_repeat(' ', 12),
-                $field->getDefinition()->getType(),
-                $field->getName()
+            return $this->prepareNullableArrayProperty(
+                $field,
+                $field->getName(),
+                sprintf(
+                    "\$this->factory()->getRepository(\%s::class)->loadById(\$item['%s'])",
+                    $field->getDefinition()->getType(),
+                    $field->getName()
+                )
             );
         }
 
         if ($valueObjectClass) {
-            return sprintf(
-                "%snew \%s(%s\$item['%s'])",
-                str_repeat(' ', 12),
-                $valueObjectClass,
-                $field->getCast(),
-                $field->getName()
+            return $this->prepareNullableArrayProperty(
+                $field,
+                $field->getName(),
+                sprintf("new \%s(%s\$item['%s'])", $valueObjectClass, $field->getCast(), $field->getName())
             );
         }
 
         return sprintf("%s%s \$item['%s']", str_repeat(' ', 12), $field->getCast(), $field->getName());
+    }
+
+    private function prepareNullableArrayProperty(TableField $field, string $property, string $strNotNull): string
+    {
+        if ($field->isNullable()) {
+            $strNotNull = sprintf("\$item['%s'] ? %s : null", $property, $strNotNull);
+        }
+
+        return sprintf('%s%s', str_repeat(' ', 12), $strNotNull);
     }
 
     public function __toString(): string

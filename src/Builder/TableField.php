@@ -72,6 +72,11 @@ class TableField
         return sprintf('(%s)', $this->type);
     }
 
+    public function isNullable(): bool
+    {
+        return $this->definition->isNullable();
+    }
+
     public function getDefinition(): PropertyDefinition
     {
         return $this->definition;

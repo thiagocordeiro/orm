@@ -25,7 +25,7 @@ class RepositoryFactory
     /**
      * @throws ClassMustHaveAConstructor
      * @throws Throwable
-     * @template T
+     * @template T of object
      * @param class-string<T> $class
      * @return EntityManager<T>
      */

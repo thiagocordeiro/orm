@@ -7,7 +7,7 @@ namespace Orm;
 use Traversable;
 
 /**
- * @template T
+ * @template T of object
  */
 abstract class EntityManager
 {
@@ -49,7 +49,7 @@ abstract class EntityManager
 
     /**
      * @param mixed[] $item
-     * @return T|null
+     * @return T
      */
     abstract public function parseDataIntoObject(array $item): object;
 

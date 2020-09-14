@@ -37,7 +37,7 @@ class RepositoryFactoryTest extends TestCase
         }
 
         $connection = new Connection($dsn);
-        $connection->exec(file_get_contents(__DIR__ . '/../Fixture/database.sql'));
+        $connection->exec((string) file_get_contents(__DIR__ . '/../Fixture/database.sql'));
 
         $this->factory = new RepositoryFactory($connection, 'var/cache/orm/', true);
     }
@@ -48,7 +48,6 @@ class RepositoryFactoryTest extends TestCase
      */
     public function testInsertAndRetrieveOrder(): void
     {
-
         $address = new Address('address-1', 'Centraal Station Straat', '1234', $this->now);
         $user = new User('user-1', new Email('thiago@thiago.com'), new Height(1.75), new Age(31), true, $address);
         $product1 = new Product('prod-1', new Amount(100, 'BRL'));
@@ -71,6 +70,9 @@ class RepositoryFactoryTest extends TestCase
         $this->assertEquals($order, $loaded);
     }
 
+    /**
+     * @throws Throwable
+     */
     public function testDeleteAddress(): void
     {
         $repository = $this->factory->getRepository(Address::class);
@@ -82,6 +84,9 @@ class RepositoryFactoryTest extends TestCase
         $this->assertNull($repository->loadById('address-1'));
     }
 
+    /**
+     * @throws Throwable
+     */
     public function testUpdateAddress(): void
     {
         $repository = $this->factory->getRepository(Address::class);
@@ -93,6 +98,9 @@ class RepositoryFactoryTest extends TestCase
         $this->assertEquals($updated, $repository->loadById('address-1'));
     }
 
+    /**
+     * @throws Throwable
+     */
     public function testLoadAddressBy(): void
     {
         $repository = $this->factory->getRepository(Address::class);
@@ -106,6 +114,9 @@ class RepositoryFactoryTest extends TestCase
         $this->assertEquals(new Address('address-2', 'Leidseplein', '500', $this->now), $entity);
     }
 
+    /**
+     * @throws Throwable
+     */
     public function testSelectAddressBy(): void
     {
         $repository = $this->factory->getRepository(Address::class);
@@ -122,6 +133,9 @@ class RepositoryFactoryTest extends TestCase
         ], iterator_to_array($entities));
     }
 
+    /**
+     * @throws Throwable
+     */
     public function testSelectLimitedAddress(): void
     {
         $repository = $this->factory->getRepository(Address::class);

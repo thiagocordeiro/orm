@@ -1,42 +1,52 @@
 create table addresses
 (
-    id varchar not null,
-    street varchar not null,
-    number varchar not null,
-    created_at datetime not null
+    id         varchar(255) not null,
+    street     varchar(255) not null,
+    number     varchar(255) not null,
+    created_at datetime     not null,
+    deleted_at datetime
 );
 
 create table order_products
 (
-    quantity float not null,
-    order_id string not null,
-    product_id string not null,
-    price_value float not null,
-    price_currency varchar not null
+    quantity       float        not null,
+    order_id       varchar(255) not null,
+    product_id     varchar(255) not null,
+    price_value    float        not null,
+    price_currency varchar(255) not null
 );
 
 create table orders
 (
-    id varchar not null,
-    user_id string not null,
-    total_value float not null,
-    total_currency varchar not null
+    id             varchar(255) not null,
+    user_id        varchar(255) not null,
+    total_value    float        not null,
+    total_currency varchar(255) not null
 );
 
 create table products
 (
-    id varchar not null,
-    price_value float not null,
-    price_currency varchar not null
+    id             varchar(255) not null,
+    price_value    float        not null,
+    price_currency varchar(255) not null
 );
 
 create table users
 (
-    id varchar not null,
-    email varchar not null,
-    height float not null,
-    age int not null,
-    active tinyint not null,
-    address_id string not null
+    id         varchar(255) not null,
+    email      varchar(255) not null,
+    height     float        not null,
+    age        int          not null,
+    active     tinyint      not null,
+    address_id varchar(255) not null
 );
+
+create table nullable_Properties
+(
+    id              varchar(255) not null,
+    email           varchar(255),
+    height          float,
+    amount_value    float,
+    amount_currency varchar(255)
+)
 
