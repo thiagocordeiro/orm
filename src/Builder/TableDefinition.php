@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Orm\Builder;
 
 use ArrayObject;
+use DateTimeInterface;
 use ICanBoogie\Inflector;
 use Roave\BetterReflection\BetterReflection;
 use Roave\BetterReflection\Reflection\ReflectionParameter;
@@ -140,10 +141,26 @@ class TableDefinition
 
         $reflection = (new BetterReflection())->classReflector()->reflect($classDefinition->getName());
 
-        $properties = array_map(
-            fn (ReflectionParameter $param) => new PropertyDefinition($reflection, $param),
-            $reflection->getConstructor()->getParameters()
-        );
+        if ($reflection->implementsInterface(DateTimeInterface::class)) {
+            return [
+                new TableField(
+                    $voProperty->getName(),
+                    $voProperty->getName(),
+                    'datetime',
+                    $voProperty->withGetter(sprintf('%s()->%s', $voProperty->getGetter(), 'format(\'Y-m-d H:i:s.u\')')),
+                    $voProperty->getType()
+                ),
+            ];
+        }
+
+        try {
+            $properties = array_map(
+                fn (ReflectionParameter $param) => new PropertyDefinition($reflection, $param),
+                $reflection->getConstructor()->getParameters()
+            );
+        } catch (Throwable $e) {
+            dd($voProperty);
+        }
 
         if (count($properties) === 1) {
             $prop = current($properties);

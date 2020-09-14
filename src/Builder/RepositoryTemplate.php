@@ -144,7 +144,7 @@ class RepositoryTemplate
         $voClass = current($objectField)->getValueObject();
 
         foreach ($objectField as $field) {
-            $fields[] = sprintf("(%s) \$item['%s']", $field->getType(), $field->getName());
+            $fields[] = sprintf("%s\$item['%s']", $field->getCast(), $field->getName());
         }
 
         return sprintf("%snew \%s(%s)", str_repeat(' ', 12), $voClass, implode(', ', $fields));
@@ -191,15 +191,15 @@ class RepositoryTemplate
 
         if ($valueObjectClass) {
             return sprintf(
-                "%snew \%s((%s) \$item['%s'])",
+                "%snew \%s(%s\$item['%s'])",
                 str_repeat(' ', 12),
                 $valueObjectClass,
-                $field->getType(),
+                $field->getCast(),
                 $field->getName()
             );
         }
 
-        return sprintf("%s(%s) \$item['%s']", str_repeat(' ', 12), $field->getType(), $field->getName());
+        return sprintf("%s%s \$item['%s']", str_repeat(' ', 12), $field->getCast(), $field->getName());
     }
 
     public function __toString(): string

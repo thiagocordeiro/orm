@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Orm\Integration;
 
+use DateTimeImmutable;
 use Orm\Connection;
 use Orm\Exception\ClassMustHaveAConstructor;
 use Orm\RepositoryFactory;
@@ -44,7 +45,8 @@ class RepositoryFactoryTest extends TestCase
      */
     public function testInsertAndRetrieveOrder(): void
     {
-        $address = new Address('address-1', 'Centraal Station Straat', '1234');
+        $now = new DateTimeImmutable('2020-09-14 22:25:30');
+        $address = new Address('address-1', 'Centraal Station Straat', '1234', $now);
         $user = new User('user-1', new Email('thiago@thiago.com'), new Height(1.75), new Age(31), true, $address);
         $product1 = new Product('prod-1', new Amount(100, 'BRL'));
         $product2 = new Product('prod-2', new Amount(20, 'BRL'));

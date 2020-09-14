@@ -17,6 +17,7 @@ class PropertyDefinition
 {
     private string $name;
     private bool $variadic;
+    private bool $nullable;
     private string $type;
     private string $getter;
     private ?ClassDefinition $class;
@@ -28,6 +29,7 @@ class PropertyDefinition
     {
         $this->name = $param->getName();
         $this->variadic = $param->isVariadic();
+        $this->nullable = $param->allowsNull();
         $this->type = $this->searchParamType($class, $param);
         $this->class = $this->getClassDefinitionByType(str_replace('[]', '', $this->type));
         $this->getter = $this->searchParamGetter($class, $param, $this->type);
@@ -70,6 +72,11 @@ class PropertyDefinition
     public function isVariadic(): bool
     {
         return $this->variadic;
+    }
+
+    public function isNullable(): bool
+    {
+        return $this->nullable;
     }
 
     public function isEntity(): bool
