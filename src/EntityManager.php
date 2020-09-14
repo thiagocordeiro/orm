@@ -6,6 +6,9 @@ namespace Orm;
 
 use Traversable;
 
+/**
+ * @template T of object
+ */
 abstract class EntityManager
 {
     private Connection $connection;
@@ -13,28 +16,40 @@ abstract class EntityManager
 
     /**
      * @param string|int $id
+     * @return T|null
      */
     abstract public function loadById($id): ?object;
 
     /**
      * @param mixed[] $where
+     * @return T|null
      */
     abstract public function loadBy(array $where): ?object;
 
     /**
      * @param mixed[] $where
-     * @return Traversable<object>
+     * @return Traversable<T>
      */
     abstract public function selectBy(array $where): Traversable;
 
+    /**
+     * @param T $entity
+     */
     abstract public function insert(object $entity): void;
 
+    /**
+     * @param T $entity
+     */
     abstract public function update(object $entity): void;
 
+    /**
+     * @param T $entity
+     */
     abstract public function delete(object $entity): void;
 
     /**
      * @param mixed[] $item
+     * @return T
      */
     abstract public function parseDataIntoObject(array $item): object;
 
@@ -56,7 +71,7 @@ abstract class EntityManager
 
     /**
      * @param mixed[] $where
-     * @return Traversable<object>
+     * @return Traversable<T>
      */
     public function select(
         string $from,
@@ -74,6 +89,7 @@ abstract class EntityManager
 
     /**
      * @param mixed[] $where
+     * @return T|null
      */
     public function selectOne(string $from, array $where, string $orderBy = ''): ?object
     {

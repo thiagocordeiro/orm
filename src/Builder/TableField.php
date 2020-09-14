@@ -15,6 +15,7 @@ class TableField
         'float',
         'int',
         'bool',
+        'datetime',
     ];
 
     private string $objectField;
@@ -60,6 +61,20 @@ class TableField
     public function getType(): string
     {
         return $this->type;
+    }
+
+    public function getCast(): string
+    {
+        if ($this->type === 'datetime') {
+            return '';
+        }
+
+        return sprintf('(%s)', $this->type);
+    }
+
+    public function isNullable(): bool
+    {
+        return $this->definition->isNullable();
     }
 
     public function getDefinition(): PropertyDefinition

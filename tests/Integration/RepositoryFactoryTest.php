@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Orm\Integration;
 
+use DateTimeImmutable;
 use Orm\Connection;
 use Orm\Exception\ClassMustHaveAConstructor;
 use Orm\RepositoryFactory;
@@ -22,9 +23,12 @@ use Throwable;
 class RepositoryFactoryTest extends TestCase
 {
     private RepositoryFactory $factory;
+    private DateTimeImmutable $now;
 
     protected function setUp(): void
     {
+        $this->now = new DateTimeImmutable('2020-09-14 22:25:30');
+
         $db = __DIR__ . '/../../var/test.sqlite';
         $dsn = sprintf('sqlite:%s', $db);
 
@@ -33,7 +37,7 @@ class RepositoryFactoryTest extends TestCase
         }
 
         $connection = new Connection($dsn);
-        $connection->exec(file_get_contents(__DIR__ . '/../Fixture/database.sql'));
+        $connection->exec((string) file_get_contents(__DIR__ . '/../Fixture/database.sql'));
 
         $this->factory = new RepositoryFactory($connection, 'var/cache/orm/', true);
     }
@@ -44,7 +48,7 @@ class RepositoryFactoryTest extends TestCase
      */
     public function testInsertAndRetrieveOrder(): void
     {
-        $address = new Address('address-1', 'Centraal Station Straat', '1234');
+        $address = new Address('address-1', 'Centraal Station Straat', '1234', $this->now);
         $user = new User('user-1', new Email('thiago@thiago.com'), new Height(1.75), new Age(31), true, $address);
         $product1 = new Product('prod-1', new Amount(100, 'BRL'));
         $product2 = new Product('prod-2', new Amount(20, 'BRL'));
@@ -66,10 +70,13 @@ class RepositoryFactoryTest extends TestCase
         $this->assertEquals($order, $loaded);
     }
 
+    /**
+     * @throws Throwable
+     */
     public function testDeleteAddress(): void
     {
         $repository = $this->factory->getRepository(Address::class);
-        $address = new Address('address-1', 'Centraal Station Straat', '1234');
+        $address = new Address('address-1', 'Centraal Station Straat', '1234', $this->now);
         $repository->insert($address);
 
         $repository->delete($address);
@@ -77,59 +84,71 @@ class RepositoryFactoryTest extends TestCase
         $this->assertNull($repository->loadById('address-1'));
     }
 
+    /**
+     * @throws Throwable
+     */
     public function testUpdateAddress(): void
     {
         $repository = $this->factory->getRepository(Address::class);
-        $repository->insert(new Address('address-1', 'Centraal Station Straat', '1234'));
+        $repository->insert(new Address('address-1', 'Centraal Station Straat', '1234', $this->now));
 
-        $updated = new Address('address-1', 'Zuid Straat', '1234');
+        $updated = new Address('address-1', 'Zuid Straat', '1234', $this->now);
         $repository->update($updated);
 
         $this->assertEquals($updated, $repository->loadById('address-1'));
     }
 
+    /**
+     * @throws Throwable
+     */
     public function testLoadAddressBy(): void
     {
         $repository = $this->factory->getRepository(Address::class);
-        $repository->insert(new Address('address-1', 'Centraal Station Straat', '1234'));
-        $repository->insert(new Address('address-2', 'Leidseplein', '500'));
-        $repository->insert(new Address('address-3', 'Leidseplein', '900'));
-        $repository->insert(new Address('address-4', 'Keizersgracht', '1200'));
+        $repository->insert(new Address('address-1', 'Centraal Station Straat', '1234', $this->now));
+        $repository->insert(new Address('address-2', 'Leidseplein', '500', $this->now));
+        $repository->insert(new Address('address-3', 'Leidseplein', '900', $this->now));
+        $repository->insert(new Address('address-4', 'Keizersgracht', '1200', $this->now));
 
         $entity = $repository->loadBy(['number' => '500']);
 
-        $this->assertEquals(new Address('address-2', 'Leidseplein', '500'), $entity);
+        $this->assertEquals(new Address('address-2', 'Leidseplein', '500', $this->now), $entity);
     }
 
+    /**
+     * @throws Throwable
+     */
     public function testSelectAddressBy(): void
     {
         $repository = $this->factory->getRepository(Address::class);
-        $repository->insert(new Address('address-1', 'Centraal Station Straat', '1234'));
-        $repository->insert(new Address('address-2', 'Leidseplein', '500'));
-        $repository->insert(new Address('address-3', 'Leidseplein', '900'));
-        $repository->insert(new Address('address-4', 'Keizersgracht', '1200'));
+        $repository->insert(new Address('address-1', 'Centraal Station Straat', '1234', $this->now));
+        $repository->insert(new Address('address-2', 'Leidseplein', '500', $this->now));
+        $repository->insert(new Address('address-3', 'Leidseplein', '900', $this->now));
+        $repository->insert(new Address('address-4', 'Keizersgracht', '1200', $this->now));
 
         $entities = $repository->selectBy(['street' => 'Leidseplein']);
 
         $this->assertEquals([
-            new Address('address-2', 'Leidseplein', '500'),
-            new Address('address-3', 'Leidseplein', '900'),
+            new Address('address-2', 'Leidseplein', '500', $this->now),
+            new Address('address-3', 'Leidseplein', '900', $this->now),
         ], iterator_to_array($entities));
     }
 
+    /**
+     * @throws Throwable
+     */
     public function testSelectLimitedAddress(): void
     {
         $repository = $this->factory->getRepository(Address::class);
-        $repository->insert(new Address('address-1', 'Centraal Station Straat', '1234'));
-        $repository->insert(new Address('address-2', 'Leidseplein', '500'));
-        $repository->insert(new Address('address-3', 'Leidseplein', '900'));
-        $repository->insert(new Address('address-4', 'Keizersgracht', '1200'));
+        $repository->insert(new Address('address-1', 'Centraal Station Straat', '1234', $this->now));
+        $repository->insert(new Address('address-2', 'Leidseplein', '500', $this->now));
+        $repository->insert(new Address('address-3', 'Leidseplein', '900', $this->now));
+        $repository->insert(new Address('address-4', 'Keizersgracht', '1200', $this->now));
 
         $entities = $repository->select('addresses', [], 'id desc', 2);
 
         $this->assertEquals([
-            new Address('address-4', 'Keizersgracht', '1200'),
-            new Address('address-3', 'Leidseplein', '900'),
+            new Address('address-4', 'Keizersgracht', '1200', $this->now),
+            new Address('address-3', 'Leidseplein', '900', $this->now),
         ], iterator_to_array($entities));
     }
 }

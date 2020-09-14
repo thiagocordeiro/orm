@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Orm\Builder;
 
 use ArrayObject;
+use DateTimeInterface;
 use ICanBoogie\Inflector;
 use Roave\BetterReflection\BetterReflection;
 use Roave\BetterReflection\Reflection\ReflectionParameter;
@@ -84,6 +85,7 @@ class TableDefinition
 
     /**
      * @throws Throwable
+     * @return ArrayObject<int|string, TableField>
      */
     private function resolveTableFields(PropertyDefinition ...$properties): ArrayObject
     {
@@ -104,11 +106,28 @@ class TableDefinition
             }
 
             if ($property->isEntity()) {
+                if ($property->isNullable()) {
+                    $array[] = new TableField(
+                        $property->getName(),
+                        sprintf('%s_id', $property->getName()),
+                        $property->getIdType(),
+                        $property->withGetter(
+                            sprintf(
+                                '%s ? $entity->%s->getId() : null',
+                                $property->getGetter(),
+                                $property->getGetter(),
+                            )
+                        )
+                    );
+
+                    continue;
+                }
+
                 $array[] = new TableField(
                     $property->getName(),
                     sprintf('%s_id', $property->getName()),
                     $property->getIdType(),
-                    $property->withGetter(sprintf('%s()->getId', $property->getGetter()))
+                    $property->withGetter(sprintf('%s->getId()', $property->getGetter()))
                 );
 
                 continue;
@@ -140,6 +159,36 @@ class TableDefinition
 
         $reflection = (new BetterReflection())->classReflector()->reflect($classDefinition->getName());
 
+        if ($reflection->implementsInterface(DateTimeInterface::class)) {
+            if ($voProperty->isNullable()) {
+                return [
+                    new TableField(
+                        $voProperty->getName(),
+                        $voProperty->getName(),
+                        'datetime',
+                        $voProperty->withGetter(
+                            sprintf(
+                                '%s ? $entity->%s->format(\'Y-m-d H:i:s.u\') : null',
+                                $voProperty->getGetter(),
+                                $voProperty->getGetter(),
+                            )
+                        ),
+                        $voProperty->getType()
+                    ),
+                ];
+            }
+
+            return [
+                new TableField(
+                    $voProperty->getName(),
+                    $voProperty->getName(),
+                    'datetime',
+                    $voProperty->withGetter(sprintf('%s->format(\'Y-m-d H:i:s.u\')', $voProperty->getGetter())),
+                    $voProperty->getType()
+                ),
+            ];
+        }
+
         $properties = array_map(
             fn (ReflectionParameter $param) => new PropertyDefinition($reflection, $param),
             $reflection->getConstructor()->getParameters()
@@ -148,26 +197,61 @@ class TableDefinition
         if (count($properties) === 1) {
             $prop = current($properties);
 
+            if ($voProperty->isNullable()) {
+                return [
+                    new TableField(
+                        $voProperty->getName(),
+                        $voProperty->getName(),
+                        $prop->getType(),
+                        $voProperty->withGetter(
+                            sprintf(
+                                '%s ? $entity->%s->%s : null',
+                                $voProperty->getGetter(),
+                                $voProperty->getGetter(),
+                                $prop->getGetter()
+                            )
+                        ),
+                        $voProperty->getType()
+                    ),
+                ];
+            }
+
             return [
                 new TableField(
                     $voProperty->getName(),
                     $voProperty->getName(),
                     $prop->getType(),
-                    $voProperty->withGetter(sprintf('%s()->%s', $voProperty->getGetter(), $prop->getGetter())),
+                    $voProperty->withGetter(sprintf('%s->%s', $voProperty->getGetter(), $prop->getGetter())),
                     $voProperty->getType()
                 ),
             ];
         }
 
-        return array_map(
-            fn (PropertyDefinition $prop) => new TableField(
+        return array_map(function (PropertyDefinition $prop) use ($voProperty): TableField {
+            if ($voProperty->isNullable()) {
+                return new TableField(
+                    $voProperty->getName(),
+                    sprintf('%s_%s', $voProperty->getName(), $prop->getName()),
+                    $prop->getType(),
+                    $voProperty->withGetter(
+                        sprintf(
+                            '%s ? $entity->%s->%s : null',
+                            $voProperty->getGetter(),
+                            $voProperty->getGetter(),
+                            $prop->getGetter(),
+                        )
+                    ),
+                    $voProperty->getType(),
+                );
+            }
+
+            return new TableField(
                 $voProperty->getName(),
                 sprintf('%s_%s', $voProperty->getName(), $prop->getName()),
                 $prop->getType(),
-                $voProperty->withGetter(sprintf('%s()->%s', $voProperty->getGetter(), $prop->getGetter())),
+                $voProperty->withGetter(sprintf('%s->%s', $voProperty->getGetter(), $prop->getGetter())),
                 $voProperty->getType(),
-            ),
-            $properties
-        );
+            );
+        }, $properties);
     }
 }
