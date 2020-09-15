@@ -4,104 +4,68 @@ declare(strict_types=1);
 
 namespace Orm;
 
-use Traversable;
+use Orm\Builder\RepositoryTemplate;
+use Orm\Builder\TableLayoutAnalyzer;
+use Orm\Exception\ClassMustHaveAConstructor;
+use Throwable;
 
-/**
- * @template T of object
- */
-abstract class EntityManager
+class EntityManager
 {
     private Connection $connection;
-    private RepositoryFactory $factory;
+    private string $cacheDir;
+    private bool $pluralize;
 
-    /**
-     * @param string|int $id
-     * @return T|null
-     */
-    abstract public function loadById($id): ?object;
-
-    /**
-     * @param mixed[] $where
-     * @return T|null
-     */
-    abstract public function loadBy(array $where): ?object;
-
-    /**
-     * @param mixed[] $where
-     * @return Traversable<T>
-     */
-    abstract public function selectBy(array $where = []): Traversable;
-
-    /**
-     * @param T $entity
-     */
-    abstract public function insert(object $entity): void;
-
-    /**
-     * @param T $entity
-     */
-    abstract public function update(object $entity): void;
-
-    /**
-     * @param T $entity
-     */
-    abstract public function delete(object $entity): void;
-
-    /**
-     * @param mixed[] $item
-     * @return T
-     */
-    abstract public function parseDataIntoObject(array $item): object;
-
-    public function __construct(Connection $connection, RepositoryFactory $factory)
+    public function __construct(Connection $connection, string $cacheDir, bool $pluralize)
     {
         $this->connection = $connection;
-        $this->factory = $factory;
-    }
-
-    public function connection(): Connection
-    {
-        return $this->connection;
-    }
-
-    public function factory(): RepositoryFactory
-    {
-        return $this->factory;
+        $this->cacheDir = $cacheDir;
+        $this->pluralize = $pluralize;
     }
 
     /**
-     * @param mixed[] $where
-     * @return Traversable<T>
+     * @param class-string<T> $class
+     * @return Repository<T>
+     * @throws ClassMustHaveAConstructor
+     * @throws Throwable
+     * @template T of object
      */
-    public function select(
-        string $from,
-        array $where,
-        string $order = '',
-        ?int $limit = null,
-        ?int $offset = null
-    ): Traversable {
-        $items = $this->connection()->select($from, $where, $order, $limit, $offset);
+    public function getRepository(string $class): Repository
+    {
+        $repositoryClassName = str_replace('\\', '_', $class) . 'Repository';
+        $repository = "Orm\\Repository\\{$repositoryClassName}";
 
-        foreach ($items as $item) {
-            yield $this->parseDataIntoObject($item);
+        if (!class_exists($repository)) {
+            $this->requireClass($repositoryClassName, $class);
         }
+
+        return new $repository($this->connection, $this);
     }
 
     /**
-     * @param mixed[] $where
-     * @return T|null
+     * @throws ClassMustHaveAConstructor
+     * @throws Throwable
      */
-    public function selectOne(string $from, array $where, string $orderBy = ''): ?object
+    private function requireClass(string $repositoryName, string $class): void
     {
-        $result = $this->connection()->select($from, $where, $orderBy, 1);
-        $items = iterator_to_array($result);
+        $filePath = sprintf('%s/%s.php', $this->cacheDir, $repositoryName);
 
-        if (!$items) {
-            return null;
+        if (false === file_exists($filePath)) {
+            $this->createRepository($filePath, $repositoryName, $class);
         }
 
-        return $this->parseDataIntoObject(
-            current($items)
-        );
+        require_once $filePath;
+    }
+
+    /**
+     * @throws ClassMustHaveAConstructor
+     * @throws Throwable
+     */
+    private function createRepository(string $filePath, string $repositoryName, string $class): void
+    {
+        $definition = (new TableLayoutAnalyzer($class, $this->pluralize))->analyze();
+        $template = new RepositoryTemplate($definition, $repositoryName);
+
+        is_dir($this->cacheDir) ?: mkdir($this->cacheDir, 0777, true);
+        file_put_contents($filePath, (string) $template);
     }
 }

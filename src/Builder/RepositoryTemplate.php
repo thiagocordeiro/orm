@@ -15,11 +15,11 @@ class RepositoryTemplate
     
     namespace Orm\Repository;
     
-    use Orm\EntityManager;
+    use Orm\Repository;
     use Traversable;
     use [class];
     
-    class [cacheClassName] extends EntityManager
+    class [cacheClassName] extends Repository
     {
         /**
          * @inheritDoc
@@ -181,7 +181,7 @@ class RepositoryTemplate
                 $field,
                 'id',
                 sprintf(
-                    "%s\$this->factory()->getRepository(\%s::class)->selectBy(['%s_id' => \$item['id']])",
+                    "%s\$this->em()->getRepository(\%s::class)->selectBy(['%s_id' => \$item['id']])",
                     $field->getDefinition()->isVariadic() ? '...' : '',
                     str_replace('[]', '', $field->getDefinition()->getType()),
                     singularize($this->definition->getTableName()),
@@ -194,7 +194,7 @@ class RepositoryTemplate
                 $field,
                 $field->getName(),
                 sprintf(
-                    "\$this->factory()->getRepository(\%s::class)->loadById(\$item['%s'])",
+                    "\$this->em()->getRepository(\%s::class)->loadById(\$item['%s'])",
                     $field->getDefinition()->getType(),
                     $field->getName()
                 )

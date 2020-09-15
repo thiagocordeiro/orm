@@ -6,8 +6,8 @@ namespace Test\Orm\Integration;
 
 use DateTimeImmutable;
 use Orm\Connection;
+use Orm\EntityManager;
 use Orm\Exception\ClassMustHaveAConstructor;
-use Orm\RepositoryFactory;
 use PHPUnit\Framework\TestCase;
 use Test\Orm\Fixture\Entity\Address;
 use Test\Orm\Fixture\Entity\Order;
@@ -22,7 +22,7 @@ use Throwable;
 
 class RepositoryFactoryTest extends TestCase
 {
-    private RepositoryFactory $factory;
+    private EntityManager $em;
     private DateTimeImmutable $now;
 
     protected function setUp(): void
@@ -39,7 +39,7 @@ class RepositoryFactoryTest extends TestCase
         $connection = new Connection($dsn);
         $connection->exec((string) file_get_contents(__DIR__ . '/../Fixture/database.sql'));
 
-        $this->factory = new RepositoryFactory($connection, 'var/cache/orm/', true);
+        $this->em = new EntityManager($connection, 'var/cache/orm/', true);
     }
 
     /**
@@ -57,15 +57,15 @@ class RepositoryFactoryTest extends TestCase
         $orderProduct2 = new OrderProduct(5, 'order-1', $product2, $product1->getPrice());
         $order = new Order('order-1', $user, new Amount(300, 'BRL'), ...[$orderProduct1, $orderProduct2]);
 
-        $this->factory->getRepository(Address::class)->insert($address);
-        $this->factory->getRepository(User::class)->insert($user);
-        $this->factory->getRepository(Product::class)->insert($product1);
-        $this->factory->getRepository(Product::class)->insert($product2);
-        $this->factory->getRepository(Order::class)->insert($order);
-        $this->factory->getRepository(OrderProduct::class)->insert($orderProduct1);
-        $this->factory->getRepository(OrderProduct::class)->insert($orderProduct2);
+        $this->em->getRepository(Address::class)->insert($address);
+        $this->em->getRepository(User::class)->insert($user);
+        $this->em->getRepository(Product::class)->insert($product1);
+        $this->em->getRepository(Product::class)->insert($product2);
+        $this->em->getRepository(Order::class)->insert($order);
+        $this->em->getRepository(OrderProduct::class)->insert($orderProduct1);
+        $this->em->getRepository(OrderProduct::class)->insert($orderProduct2);
 
-        $loaded = $this->factory->getRepository(Order::class)->loadById('order-1');
+        $loaded = $this->em->getRepository(Order::class)->loadById('order-1');
 
         $this->assertEquals($order, $loaded);
     }
@@ -75,7 +75,7 @@ class RepositoryFactoryTest extends TestCase
      */
     public function testDeleteAddress(): void
     {
-        $repository = $this->factory->getRepository(Address::class);
+        $repository = $this->em->getRepository(Address::class);
         $address = new Address('address-1', 'Centraal Station Straat', '1234', $this->now);
         $repository->insert($address);
 
@@ -89,7 +89,7 @@ class RepositoryFactoryTest extends TestCase
      */
     public function testUpdateAddress(): void
     {
-        $repository = $this->factory->getRepository(Address::class);
+        $repository = $this->em->getRepository(Address::class);
         $repository->insert(new Address('address-1', 'Centraal Station Straat', '1234', $this->now));
 
         $updated = new Address('address-1', 'Zuid Straat', '1234', $this->now);
@@ -103,7 +103,7 @@ class RepositoryFactoryTest extends TestCase
      */
     public function testLoadAddressBy(): void
     {
-        $repository = $this->factory->getRepository(Address::class);
+        $repository = $this->em->getRepository(Address::class);
         $repository->insert(new Address('address-1', 'Centraal Station Straat', '1234', $this->now));
         $repository->insert(new Address('address-2', 'Leidseplein', '500', $this->now));
         $repository->insert(new Address('address-3', 'Leidseplein', '900', $this->now));
@@ -119,7 +119,7 @@ class RepositoryFactoryTest extends TestCase
      */
     public function testSelectAddressBy(): void
     {
-        $repository = $this->factory->getRepository(Address::class);
+        $repository = $this->em->getRepository(Address::class);
         $repository->insert(new Address('address-1', 'Centraal Station Straat', '1234', $this->now));
         $repository->insert(new Address('address-2', 'Leidseplein', '500', $this->now));
         $repository->insert(new Address('address-3', 'Leidseplein', '900', $this->now));
@@ -138,7 +138,7 @@ class RepositoryFactoryTest extends TestCase
      */
     public function testSelectLimitedAddress(): void
     {
-        $repository = $this->factory->getRepository(Address::class);
+        $repository = $this->em->getRepository(Address::class);
         $repository->insert(new Address('address-1', 'Centraal Station Straat', '1234', $this->now));
         $repository->insert(new Address('address-2', 'Leidseplein', '500', $this->now));
         $repository->insert(new Address('address-3', 'Leidseplein', '900', $this->now));
