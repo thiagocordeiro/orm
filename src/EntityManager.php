@@ -30,7 +30,7 @@ abstract class EntityManager
      * @param mixed[] $where
      * @return Traversable<T>
      */
-    abstract public function selectBy(array $where): Traversable;
+    abstract public function selectBy(array $where = []): Traversable;
 
     /**
      * @param T $entity

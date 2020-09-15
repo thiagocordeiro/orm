@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace Orm;
 
 use PDO;
+use PDOException;
 use PDOStatement;
+use Throwable;
 
 class Connection
 {
     protected PDO $pdo;
+    private int $transactionDepth = 0;
 
     /**
      * @param mixed[] $options
@@ -61,6 +64,74 @@ class Connection
     public function exec(string $statement): void
     {
         $this->pdo->exec($statement);
+    }
+
+    /**
+     * @return mixed
+     * @throws Throwable
+     */
+    public function transaction(callable $fn)
+    {
+        $this->beginTransaction();
+
+        try {
+            $res = $fn($this);
+            $this->commit();
+
+            return $res;
+        } catch (Throwable $e) {
+            $this->rollback();
+
+            throw $e;
+        }
+    }
+
+    public function beginTransaction(): void
+    {
+        $this->transactionDepth += 1;
+
+        if ($this->supportsNestedTransaction() && $this->transactionDepth > 1) {
+            $this->exec("SAVEPOINT LEVEL{$this->transactionDepth}");
+
+            return;
+        }
+
+        $this->pdo->beginTransaction();
+    }
+
+    public function commit(): void
+    {
+        $this->transactionDepth -= 1;
+
+        if ($this->supportsNestedTransaction() && $this->transactionDepth > 0) {
+            $this->exec("RELEASE SAVEPOINT LEVEL{$this->transactionDepth}");
+
+            return;
+        }
+
+        $this->pdo->commit();
+    }
+
+    public function rollback(): void
+    {
+        if ($this->transactionDepth === 0) {
+            throw new PDOException('Rollback error: There is no transaction started');
+        }
+
+        $this->transactionDepth -= 1;
+
+        if ($this->supportsNestedTransaction() && $this->transactionDepth > 0) {
+            $this->exec("RELEASE SAVEPOINT LEVEL{$this->transactionDepth}");
+
+            return;
+        }
+
+        $this->pdo->rollBack();
+    }
+
+    private function supportsNestedTransaction(): bool
+    {
+        return in_array($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME), ['mysql', 'pgsql']);
     }
 
     /**
