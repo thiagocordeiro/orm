@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Orm;
 
+use ICanBoogie\Inflector;
 use PDO;
 use PDOException;
 use PDOStatement;
@@ -148,6 +149,8 @@ class Connection
         $params = [];
 
         foreach ($conditions as $column => $value) {
+            $column = Inflector::get()->underscore($column);
+
             if (is_null($value)) {
                 $where[] = sprintf('`%s` is null', $column);
 
