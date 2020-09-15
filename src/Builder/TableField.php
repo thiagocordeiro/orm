@@ -69,7 +69,7 @@ class TableField
             return '';
         }
 
-        return sprintf('(%s)', $this->type);
+        return sprintf('(%s) ', $this->type);
     }
 
     public function isNullable(): bool

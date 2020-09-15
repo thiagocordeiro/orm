@@ -209,7 +209,11 @@ class RepositoryTemplate
             );
         }
 
-        return sprintf("%s%s \$item['%s']", str_repeat(' ', 12), $field->getCast(), $field->getName());
+        return $this->prepareNullableArrayProperty(
+            $field,
+            $field->getName(),
+            sprintf("%s\$item['%s']", $field->getCast(), $field->getName())
+        );
     }
 
     private function prepareNullableArrayProperty(TableField $field, string $property, string $strNotNull): string
