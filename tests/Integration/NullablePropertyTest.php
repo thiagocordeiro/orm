@@ -8,6 +8,7 @@ use Orm\Connection;
 use Orm\RepositoryFactory;
 use PHPUnit\Framework\TestCase;
 use Test\Orm\Fixture\Entity\NullableProperty;
+use Test\Orm\Fixture\Vo\Height;
 use Throwable;
 
 class NullablePropertyTest extends TestCase
@@ -39,6 +40,25 @@ class NullablePropertyTest extends TestCase
 
         $repository->insert($entity);
 
-        $this->assertEquals($entity, $repository->loadById('nnn'));
+        $this->assertEquals(
+            new NullableProperty('nnn', null, null, null),
+            $repository->loadById('nnn')
+        );
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function testSaveAndRetrieveWithSomeNullValues(): void
+    {
+        $repository = $this->factory->getRepository(NullableProperty::class);
+        $entity = new NullableProperty('nnn', null, new Height(1.76), null);
+
+        $repository->insert($entity);
+
+        $this->assertEquals(
+            new NullableProperty('nnn', null, new Height(1.76), null),
+            $repository->loadById('nnn')
+        );
     }
 }
