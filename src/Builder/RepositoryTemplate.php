@@ -8,7 +8,7 @@ use function ICanBoogie\singularize;
 
 class RepositoryTemplate
 {
-    private const TEMPLATE = <<<'STRING'
+    private const TEMPLATE = <<<'PHP'
     <?php
     
     declare(strict_types=1);
@@ -17,13 +17,13 @@ class RepositoryTemplate
     
     use Orm\Repository;
     use Traversable;
-    use [class];
+    use _class_name_;
     
-    class [cacheClassName] extends Repository
+    class _cache_class_name_ extends Repository
     {
         /**
          * @inheritDoc
-         * @return [short_class]|null
+         * @return _short_class_|null
          */
         public function loadById($id): ?object
         {
@@ -32,63 +32,67 @@ class RepositoryTemplate
         
         /**
          * @inheritDoc
-         * @return [short_class]|null
+         * @return _short_class_|null
          */
         public function loadBy(array $where): ?object
         {
-            return $this->selectOne('[table]', $where);
+            return $this->selectOne('_table_name_', $where);
         }
         
         /**
          * @param mixed[] $where
-         * @return Traversable<[short_class]>
+         * @return Traversable<_short_class_>
          */
-        public function selectBy(array $where = []): Traversable
-        {
-            return $this->select('[table]', $where);
+        public function selectBy(
+            array $where = [],
+            string $order = '',
+            ?int $limit = null,
+            ?int $offset = null
+        ): Traversable {
+            return $this->select('_table_name_', $where);
         }
     
         /**
-         * @param [short_class] $entity
+         * @param _short_class_ $entity
          */
         public function insert(object $entity): void
         {
             $statement = <<<SQL
-                insert into [table] values (
-                    [inline_fields]
+                insert into _table_name_ values (
+                    _inline_fields_
                 );
             SQL;
     
             $this->connection()->execute($statement, [
-                [bindings],
+                _bindings_,
             ]);
         }
     
         /**
-         * @param [short_class] $entity
+         * @param _short_class_ $entity
          */
         public function update(object $entity): void
         {
             $statement = <<<SQL
-                update [table] set
-                    [inline_field_values]
+                update _table_name_ set
+                    _inline_field_values_
                 where
                     id = :id
                 ;
             SQL;
     
             $this->connection()->execute($statement, [
-                [bindings],
+                _bindings_,
             ]);
         }
     
         /**
-         * @param [short_class] $entity
+         * @param _short_class_ $entity
          */
         public function delete(object $entity): void
         {
             $statement = <<<SQL
-                delete from [table] where id = :id;
+                delete from _table_name_ where id = :id;
             SQL;
     
             $this->connection()->execute($statement, [
@@ -98,16 +102,16 @@ class RepositoryTemplate
         
         /**
          * @inheritDoc
-         * @return [short_class]
+         * @return _short_class_
          */
         public function parseDataIntoObject(array $item): object
         {
-            return new [short_class](
-                [array_fields],
+            return new _short_class_(
+                _array_fields_,
             );
         }
     }
-    STRING;
+    PHP;
 
     private TableDefinition $definition;
     private string $repositoryName;
@@ -253,14 +257,14 @@ class RepositoryTemplate
         );
 
         $template = self::TEMPLATE;
-        $template = str_replace('[cacheClassName]', $this->repositoryName, $template);
-        $template = str_replace('[class]', $this->definition->getClass()->getName(), $template);
-        $template = str_replace('[short_class]', $this->definition->getClass()->getShortName(), $template);
-        $template = str_replace('[table]', $this->definition->getTableName(), $template);
-        $template = str_replace('[inline_fields]', trim(implode(",\n", $inlineFields)), $template);
-        $template = str_replace('[inline_field_values]', trim(implode(",\n", $fieldValues)), $template);
-        $template = str_replace('[bindings]', trim(implode(",\n", $bindings)), $template);
-        $template = str_replace('[array_fields]', trim(implode(",\n", $this->getArrayFields())), $template);
+        $template = str_replace('_cache_class_name_', $this->repositoryName, $template);
+        $template = str_replace('_class_name_', $this->definition->getClass()->getName(), $template);
+        $template = str_replace('_short_class_', $this->definition->getClass()->getShortName(), $template);
+        $template = str_replace('_table_name_', $this->definition->getTableName(), $template);
+        $template = str_replace('_inline_fields_', trim(implode(",\n", $inlineFields)), $template);
+        $template = str_replace('_inline_field_values_', trim(implode(",\n", $fieldValues)), $template);
+        $template = str_replace('_bindings_', trim(implode(",\n", $bindings)), $template);
+        $template = str_replace('_array_fields_', trim(implode(",\n", $this->getArrayFields())), $template);
 
         return $template;
     }

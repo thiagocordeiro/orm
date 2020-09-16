@@ -30,7 +30,12 @@ abstract class Repository
      * @param mixed[] $where
      * @return Traversable<T>
      */
-    abstract public function selectBy(array $where = []): Traversable;
+    abstract public function selectBy(
+        array $where = [],
+        string $order = '',
+        ?int $limit = null,
+        ?int $offset = null
+    ): Traversable;
 
     /**
      * @param T $entity
