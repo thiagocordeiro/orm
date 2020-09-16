@@ -12,18 +12,36 @@ use Throwable;
 
 class Connection
 {
-    protected PDO $pdo;
+    protected ?PDO $pdo = null;
     private int $transactionDepth = 0;
+    private string $dsn;
+    private ?string $user;
+    private ?string $password;
+
+    /** @var mixed[] */
+    private array $options;
 
     /**
      * @param mixed[] $options
      */
     public function __construct(string $dsn, ?string $user = null, ?string $password = null, array $options = [])
     {
-        $this->pdo = new PDO($dsn, $user, $password, $options);
-        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-        $this->pdo->setAttribute(PDO::MYSQL_ATTR_INIT_COMMAND, 'SET NAMES utf8');
+        $this->dsn = $dsn;
+        $this->user = $user;
+        $this->password = $password;
+        $this->options = $options;
+    }
+
+    public function pdo(): PDO
+    {
+        if (null === $this->pdo) {
+            $this->pdo = new PDO($this->dsn, $this->user, $this->password, $this->options);
+            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            $this->pdo->setAttribute(PDO::MYSQL_ATTR_INIT_COMMAND, 'SET NAMES utf8');
+        }
+
+        return $this->pdo;
     }
 
     /**
@@ -38,7 +56,7 @@ class Connection
     ): PDOStatement {
         [$where, $params] = $this->getWhere($conditions);
 
-        $stmt = $this->pdo->prepare(
+        $stmt = $this->pdo()->prepare(
             sprintf(
                 'select * from %s %s %s %s %s',
                 $table,
@@ -59,13 +77,13 @@ class Connection
      */
     public function execute(string $statement, array $params = []): void
     {
-        $stmt = $this->pdo->prepare($statement);
+        $stmt = $this->pdo()->prepare($statement);
         $stmt->execute($params);
     }
 
     public function exec(string $statement): void
     {
-        $this->pdo->exec($statement);
+        $this->pdo()->exec($statement);
     }
 
     /**
@@ -98,7 +116,7 @@ class Connection
             return;
         }
 
-        $this->pdo->beginTransaction();
+        $this->pdo()->beginTransaction();
     }
 
     public function commit(): void
@@ -111,7 +129,7 @@ class Connection
             return;
         }
 
-        $this->pdo->commit();
+        $this->pdo()->commit();
     }
 
     public function rollback(): void
@@ -128,12 +146,17 @@ class Connection
             return;
         }
 
-        $this->pdo->rollBack();
+        $this->pdo()->rollBack();
+    }
+
+    public function close(): void
+    {
+        $this->pdo = null;
     }
 
     private function supportsNestedTransaction(): bool
     {
-        return in_array($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME), ['mysql', 'pgsql']);
+        return in_array($this->pdo()->getAttribute(PDO::ATTR_DRIVER_NAME), ['mysql', 'pgsql']);
     }
 
     /**
