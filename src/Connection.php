@@ -75,10 +75,12 @@ class Connection
     /**
      * @param mixed[] $params
      */
-    public function execute(string $statement, array $params = []): void
+    public function execute(string $statement, array $params = []): PDOStatement
     {
         $stmt = $this->pdo()->prepare($statement);
         $stmt->execute($params);
+
+        return $stmt;
     }
 
     public function exec(string $statement): void
