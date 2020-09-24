@@ -150,6 +150,12 @@ class RepositoryTemplate
         $voClass = current($objectField)->getValueObject();
 
         foreach ($objectField as $subField) {
+            if (false === $subField->isScalar()) {
+                $subFields[] = sprintf("new \%s(\$item['%s'])", $subField->getType(), $subField->getName());
+
+                continue;
+            }
+
             $subFields[] = sprintf("%s\$item['%s']", $subField->getCast(), $subField->getName());
         }
 

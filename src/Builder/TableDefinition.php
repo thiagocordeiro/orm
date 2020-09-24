@@ -6,6 +6,7 @@ namespace Orm\Builder;
 
 use ArrayObject;
 use DateTimeInterface;
+use Exception;
 use ICanBoogie\Inflector;
 use Roave\BetterReflection\BetterReflection;
 use Roave\BetterReflection\Reflection\ReflectionParameter;
@@ -84,8 +85,8 @@ class TableDefinition
     }
 
     /**
-     * @throws Throwable
      * @return ArrayObject<int|string, TableField>
+     * @throws Throwable
      */
     private function resolveTableFields(PropertyDefinition ...$properties): ArrayObject
     {
@@ -239,6 +240,38 @@ class TableDefinition
                             $voProperty->getGetter(),
                             $voProperty->getGetter(),
                             $prop->getGetter(),
+                        )
+                    ),
+                    $voProperty->getType(),
+                );
+            }
+
+            $classDefinition = $prop->getClassDefinition();
+
+            if ($classDefinition instanceof ClassDefinition) {
+                $class = (new BetterReflection())->classReflector()->reflect($classDefinition->getName());
+
+                $properties = array_map(
+                    fn (ReflectionParameter $param) => new PropertyDefinition($class, $param),
+                    $class->getConstructor()->getParameters()
+                );
+
+                if (count($properties) > 1) {
+                    throw new Exception(sprintf('Invalid field type %s', $prop->getType()));
+                }
+
+                $vo = current($properties);
+
+                return new TableField(
+                    $voProperty->getName(),
+                    sprintf('%s_%s', $voProperty->getName(), $prop->getName()),
+                    $prop->getType(),
+                    $voProperty->withGetter(
+                        sprintf(
+                            '%s->%s->%s',
+                            $voProperty->getGetter(),
+                            $prop->getGetter(),
+                            $vo->getGetter(),
                         )
                     ),
                     $voProperty->getType(),

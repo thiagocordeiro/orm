@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Orm\Builder;
 
-use Exception;
 use ICanBoogie\Inflector;
 use Throwable;
 
@@ -36,10 +35,6 @@ class TableField
         ?string $valueObject = null,
         bool $child = false
     ) {
-        if (false === in_array($type, self::TYPES)) {
-            throw new Exception(sprintf('Unknown table type %s for %s', $type, $definition->getName()));
-        }
-
         $this->objectField = $objectField;
         $this->name = Inflector::get()->underscore($name);
         $this->type = $type;
@@ -90,5 +85,10 @@ class TableField
     public function isChild(): bool
     {
         return $this->child;
+    }
+
+    public function isScalar(): bool
+    {
+        return in_array($this->type, self::TYPES);
     }
 }

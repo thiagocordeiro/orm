@@ -7,9 +7,9 @@ namespace Test\Orm\Fixture\Vo;
 class Amount
 {
     private float $value;
-    private string $currency;
+    private Currency $currency;
 
-    public function __construct(float $value, string $currency)
+    public function __construct(float $value, Currency $currency)
     {
         $this->value = $value;
         $this->currency = $currency;
@@ -20,7 +20,7 @@ class Amount
         return $this->value;
     }
 
-    public function getCurrency(): string
+    public function getCurrency(): Currency
     {
         return $this->currency;
     }

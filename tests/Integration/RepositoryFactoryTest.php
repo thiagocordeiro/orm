@@ -5,41 +5,29 @@ declare(strict_types=1);
 namespace Test\Orm\Integration;
 
 use DateTimeImmutable;
-use Orm\Connection;
-use Orm\EntityManager;
 use Orm\Exception\ClassMustHaveAConstructor;
-use PHPUnit\Framework\TestCase;
+use Test\Orm\Config\IntegrationTestCase;
 use Test\Orm\Fixture\Entity\Address;
 use Test\Orm\Fixture\Entity\Order;
 use Test\Orm\Fixture\Entity\Product;
 use Test\Orm\Fixture\Entity\User;
 use Test\Orm\Fixture\Vo\Age;
 use Test\Orm\Fixture\Vo\Amount;
+use Test\Orm\Fixture\Vo\Currency;
 use Test\Orm\Fixture\Vo\Email;
 use Test\Orm\Fixture\Vo\Height;
 use Test\Orm\Fixture\Vo\OrderProduct;
 use Throwable;
 
-class RepositoryFactoryTest extends TestCase
+class RepositoryFactoryTest extends IntegrationTestCase
 {
-    private EntityManager $em;
     private DateTimeImmutable $now;
 
     protected function setUp(): void
     {
+        parent::setUp();
+
         $this->now = new DateTimeImmutable('2020-09-14 22:25:30');
-
-        $db = __DIR__ . '/../../var/test.sqlite';
-        $dsn = sprintf('sqlite:%s', $db);
-
-        if (file_exists($db)) {
-            unlink($db);
-        }
-
-        $connection = new Connection($dsn);
-        $connection->exec((string) file_get_contents(__DIR__ . '/../Fixture/database.sql'));
-
-        $this->em = new EntityManager($connection, 'var/cache/orm/', true);
     }
 
     /**
@@ -50,12 +38,12 @@ class RepositoryFactoryTest extends TestCase
     {
         $address = new Address('address-1', 'Centraal Station Straat', '1234', $this->now);
         $user = new User('user-1', new Email('thiago@thiago.com'), new Height(1.75), new Age(31), true, $address);
-        $product1 = new Product('prod-1', new Amount(100, 'BRL'));
-        $product2 = new Product('prod-2', new Amount(20, 'BRL'));
+        $product1 = new Product('prod-1', new Amount(100, Currency::EUR()));
+        $product2 = new Product('prod-2', new Amount(20, Currency::EUR()));
 
         $orderProduct1 = new OrderProduct(2, 'order-1', $product1, $product1->getPrice());
         $orderProduct2 = new OrderProduct(5, 'order-1', $product2, $product1->getPrice());
-        $order = new Order('order-1', $user, new Amount(300, 'BRL'), ...[$orderProduct1, $orderProduct2]);
+        $order = new Order('order-1', $user, new Amount(300, Currency::EUR()), ...[$orderProduct1, $orderProduct2]);
 
         $this->em->getRepository(Address::class)->insert($address);
         $this->em->getRepository(User::class)->insert($user);
