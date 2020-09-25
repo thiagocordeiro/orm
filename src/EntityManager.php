@@ -15,11 +15,23 @@ class EntityManager
     private string $cacheDir;
     private bool $pluralize;
 
-    public function __construct(Connection $connection, string $cacheDir, bool $pluralize)
+    /** @var mixed[] */
+    private array $entityConfig;
+
+    /**
+     * @param mixed[] $entityConfig
+     */
+    public function __construct(Connection $connection, string $cacheDir, bool $pluralize, array $entityConfig = [])
     {
         $this->connection = $connection;
         $this->cacheDir = $cacheDir;
         $this->pluralize = $pluralize;
+        $this->entityConfig = $entityConfig;
+    }
+
+    public function getConnection(): Connection
+    {
+        return $this->connection;
     }
 
     /**
@@ -62,8 +74,11 @@ class EntityManager
      */
     private function createRepository(string $filePath, string $repositoryName, string $class): void
     {
-        $definition = (new TableLayoutAnalyzer($class, $this->pluralize))->analyze();
-        $template = new RepositoryTemplate($definition, $repositoryName);
+        $config = $this->entityConfig[$class] ?? [];
+        $table = $config['table'] ?? null;
+
+        $definition = (new TableLayoutAnalyzer($class, $this->pluralize, $table))->analyze();
+        $template = new RepositoryTemplate($definition, $repositoryName, $config);
 
         is_dir($this->cacheDir) ?: mkdir($this->cacheDir, 0777, true);
         file_put_contents($filePath, (string) $template);

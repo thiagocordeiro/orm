@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Orm;
 
+use Exception;
 use ICanBoogie\Inflector;
 use PDO;
 use PDOException;
@@ -46,11 +47,13 @@ class Connection
 
     /**
      * @param mixed[] $conditions
+     * @param array<string, string> $order
+     * @throws Throwable
      */
     public function select(
         string $table,
         array $conditions = [],
-        string $order = '',
+        array $order = [],
         ?int $limit = null,
         ?int $offset = null
     ): PDOStatement {
@@ -61,7 +64,7 @@ class Connection
                 'select * from %s %s %s %s %s',
                 $table,
                 $where,
-                $order ? "order by {$order}" : '',
+                $this->getOrder($order),
                 $limit ? "limit {$limit}" : '',
                 $offset ? "offset {$offset}" : '',
             )
@@ -110,28 +113,20 @@ class Connection
 
     public function beginTransaction(): void
     {
-        $this->transactionDepth += 1;
+        $this->supportsNestedTransaction() === false || $this->transactionDepth === 0
+            ? $this->pdo()->beginTransaction()
+            : $this->exec("SAVEPOINT LEVEL{$this->transactionDepth}");
 
-        if ($this->supportsNestedTransaction() && $this->transactionDepth > 1) {
-            $this->exec("SAVEPOINT LEVEL{$this->transactionDepth}");
-
-            return;
-        }
-
-        $this->pdo()->beginTransaction();
+        $this->transactionDepth++;
     }
 
     public function commit(): void
     {
-        $this->transactionDepth -= 1;
+        $this->transactionDepth--;
 
-        if ($this->supportsNestedTransaction() && $this->transactionDepth > 0) {
-            $this->exec("RELEASE SAVEPOINT LEVEL{$this->transactionDepth}");
-
-            return;
-        }
-
-        $this->pdo()->commit();
+        $this->supportsNestedTransaction() === false || $this->transactionDepth === 0
+            ? $this->pdo()->commit()
+            : $this->exec("RELEASE SAVEPOINT LEVEL{$this->transactionDepth}");
     }
 
     public function rollback(): void
@@ -140,15 +135,11 @@ class Connection
             throw new PDOException('Rollback error: There is no transaction started');
         }
 
-        $this->transactionDepth -= 1;
+        $this->transactionDepth--;
 
-        if ($this->supportsNestedTransaction() && $this->transactionDepth > 0) {
-            $this->exec("RELEASE SAVEPOINT LEVEL{$this->transactionDepth}");
-
-            return;
-        }
-
-        $this->pdo()->rollBack();
+        $this->supportsNestedTransaction() === false || $this->transactionDepth === 0
+            ? $this->pdo()->rollBack()
+            : $this->exec("RELEASE SAVEPOINT LEVEL{$this->transactionDepth}");
     }
 
     public function close(): void
@@ -188,5 +179,28 @@ class Connection
         }
 
         return [sprintf('where %s', implode(' AND ', $where)), $params];
+    }
+
+    /**
+     * @param array<string, string> $order
+     * @throws Throwable
+     */
+    private function getOrder(array $order): string
+    {
+        if (count($order) === 0) {
+            return '';
+        }
+
+        $ordering = [];
+
+        foreach ($order as $field => $direction) {
+            if (false === in_array(strtolower($direction), ['asc', 'desc'])) {
+                throw new Exception(sprintf('Invalid sql ordering (%s %s)', $field, $direction));
+            }
+
+            $ordering[] = sprintf("%s %s", Inflector::get()->underscore($field), $direction);
+        }
+
+        return sprintf('ORDER BY %s', implode(', ', $ordering));
     }
 }

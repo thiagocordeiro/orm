@@ -7,7 +7,6 @@ namespace Orm\Builder;
 use ArrayObject;
 use DateTimeInterface;
 use Exception;
-use ICanBoogie\Inflector;
 use Roave\BetterReflection\BetterReflection;
 use Roave\BetterReflection\Reflection\ReflectionParameter;
 use Throwable;
@@ -27,10 +26,10 @@ class TableDefinition
     /**
      * @throws Throwable
      */
-    public function __construct(bool $pluralized, ClassDefinition $class, PropertyDefinition ...$properties)
+    public function __construct(ClassDefinition $class, string $table, PropertyDefinition ...$properties)
     {
         $this->class = $class;
-        $this->tableName = $this->resolveTableName($pluralized, $class->getShortName());
+        $this->tableName = $table;
         $this->tableFields = $this->resolveTableFields(...$properties);
         $this->children = new ArrayObject(array_filter($properties, fn (PropertyDefinition $prop) => $prop->isArray()));
     }
@@ -73,15 +72,6 @@ class TableDefinition
     public function getChildren(): Traversable
     {
         return $this->children;
-    }
-
-    private function resolveTableName(bool $pluralized, string $shortName): string
-    {
-        return Inflector::get()->underscore(
-            $pluralized
-                ? Inflector::get()->pluralize($shortName)
-                : $shortName
-        );
     }
 
     /**

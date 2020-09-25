@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Orm\Builder;
 
+use ICanBoogie\Inflector;
 use Orm\Exception\ClassMustHaveAConstructor;
 use Roave\BetterReflection\BetterReflection;
 use Roave\BetterReflection\Reflection\ReflectionClass;
@@ -14,12 +15,12 @@ use Throwable;
 class TableLayoutAnalyzer
 {
     private ReflectionClass $class;
-    private bool $pluralized;
+    private string $table;
 
     /**
      * @throws ClassMustHaveAConstructor
      */
-    public function __construct(string $className, bool $pluralized)
+    public function __construct(string $className, bool $pluralized, ?string $table = null)
     {
         $class = (new BetterReflection())->classReflector()->reflect($className);
         $constructor = $class->getConstructor();
@@ -29,7 +30,7 @@ class TableLayoutAnalyzer
         }
 
         $this->class = $class;
-        $this->pluralized = $pluralized;
+        $this->table = $table ?? $this->resolveTableName($this->class->getShortName(), $pluralized);
     }
 
     /**
@@ -45,6 +46,15 @@ class TableLayoutAnalyzer
             $properties
         );
 
-        return new TableDefinition($this->pluralized, $class, ...$properties);
+        return new TableDefinition($class, $this->table, ...$properties);
+    }
+
+    private function resolveTableName(string $shortName, bool $pluralized): string
+    {
+        return Inflector::get()->underscore(
+            $pluralized
+                ? Inflector::get()->pluralize($shortName)
+                : $shortName
+        );
     }
 }

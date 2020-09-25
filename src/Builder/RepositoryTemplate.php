@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Orm\Builder;
 
 use function ICanBoogie\singularize;
+use function ICanBoogie\underscore;
 
 class RepositoryTemplate
 {
@@ -34,9 +35,11 @@ class RepositoryTemplate
          * @inheritDoc
          * @return _short_class_|null
          */
-        public function loadBy(array $where): ?object
+        public function loadBy(array $where, array $order = []): ?object
         {
-            return $this->selectOne('_table_name_', $where);
+            $order = empty($order) ? _default_order_ : $order;
+
+            return $this->selectOne('_table_name_', $where, $order);
         }
         
         /**
@@ -45,33 +48,37 @@ class RepositoryTemplate
          */
         public function selectBy(
             array $where = [],
-            string $order = '',
+            array $order = [],
             ?int $limit = null,
             ?int $offset = null
         ): Traversable {
-            return $this->select('_table_name_', $where);
+            $order = empty($order) ? _default_order_ : $order;
+
+            return $this->select('_table_name_', $where, $order, $limit, $offset);
         }
     
         /**
-         * @param _short_class_ $entity
+         * @param array<_short_class_> $entities
          */
-        public function insert(object $entity): void
+        public function insert(object ...$entities): void
         {
             $statement = <<<SQL
                 insert into _table_name_ values (
                     _inline_fields_
                 );
             SQL;
-    
-            $this->connection()->execute($statement, [
-                _bindings_,
-            ]);
+
+            foreach ($entities as $entity) {
+                $this->connection()->execute($statement, [
+                    _bindings_,
+                ]);
+            }
         }
     
         /**
-         * @param _short_class_ $entity
+         * @param array<_short_class_> $entities
          */
-        public function update(object $entity): void
+        public function update(object ...$entities): void
         {
             $statement = <<<SQL
                 update _table_name_ set
@@ -80,24 +87,28 @@ class RepositoryTemplate
                     id = :id
                 ;
             SQL;
-    
-            $this->connection()->execute($statement, [
-                _bindings_,
-            ]);
+
+            foreach ($entities as $entity) {
+                $this->connection()->execute($statement, [
+                    _bindings_,
+                ]);
+            }
         }
     
         /**
-         * @param _short_class_ $entity
+         * @param array<_short_class_> $entities
          */
-        public function delete(object $entity): void
+        public function delete(object ...$entities): void
         {
             $statement = <<<SQL
                 delete from _table_name_ where id = :id;
             SQL;
-    
-            $this->connection()->execute($statement, [
-                'id' => $entity->getId(),
-            ]);
+
+            foreach ($entities as $entity) {
+                $this->connection()->execute($statement, [
+                    'id' => $entity->getId(),
+                ]);
+            }
         }
         
         /**
@@ -116,10 +127,17 @@ class RepositoryTemplate
     private TableDefinition $definition;
     private string $repositoryName;
 
-    public function __construct(TableDefinition $definition, string $repositoryName)
+    /** @var mixed[] */
+    private array $config;
+
+    /**
+     * @param mixed[] $config
+     */
+    public function __construct(TableDefinition $definition, string $repositoryName, array $config)
     {
         $this->definition = $definition;
         $this->repositoryName = $repositoryName;
+        $this->config = $config;
     }
 
     /**
@@ -194,7 +212,7 @@ class RepositoryTemplate
                     "%s\$this->em()->getRepository(\%s::class)->selectBy(['%s_id' => \$item['id']])",
                     $field->getDefinition()->isVariadic() ? '...' : '',
                     str_replace('[]', '', $field->getDefinition()->getType()),
-                    singularize($this->definition->getTableName()),
+                    underscore(singularize($this->definition->getClass()->getShortName())),
                 )
             );
         }
@@ -235,6 +253,18 @@ class RepositoryTemplate
         return sprintf('%s%s', str_repeat(' ', 12), $strNotNull);
     }
 
+    private function getDefaultOrder(): string
+    {
+        $ordering = [];
+        $orders = $this->config['order'] ?? [];
+
+        foreach ($orders as $column => $direction) {
+            $ordering[] = sprintf("'%s' => '%s'", underscore($column), $direction);
+        }
+
+        return sprintf('[%s]', implode(', ', $ordering));
+    }
+
     public function __toString(): string
     {
         $inlineFields = array_map(
@@ -255,7 +285,7 @@ class RepositoryTemplate
         $bindings = array_map(
             fn (TableField $field) => sprintf(
                 "%s'%s' => \$entity->%s",
-                str_repeat(' ', 12),
+                str_repeat(' ', 16),
                 $field->getName(),
                 $field->getDefinition()->getGetter(),
             ),
@@ -271,6 +301,7 @@ class RepositoryTemplate
         $template = str_replace('_inline_field_values_', trim(implode(",\n", $fieldValues)), $template);
         $template = str_replace('_bindings_', trim(implode(",\n", $bindings)), $template);
         $template = str_replace('_array_fields_', trim(implode(",\n", $this->getArrayFields())), $template);
+        $template = str_replace('_default_order_', $this->getDefaultOrder(), $template);
 
         return $template;
     }
