@@ -63,8 +63,10 @@ class RepositoryTemplate
         public function insert(object ...$entities): void
         {
             $statement = <<<SQL
-                insert into _table_name_ values (
-                    _inline_fields_
+                insert into _table_name_ (
+                    _inline_columns_
+                ) values (
+                    _inline_bindings_
                 );
             SQL;
 
@@ -272,6 +274,11 @@ class RepositoryTemplate
             iterator_to_array($this->definition->getTableFields())
         );
 
+        $inlineColumns = array_map(
+            fn (TableField $field) => sprintf("%s`%s`", str_repeat(' ', 16), $field->getName()),
+            iterator_to_array($this->definition->getTableFields())
+        );
+
         $fieldValues = array_map(
             fn (TableField $field) => sprintf(
                 "%s`%s` = :%s",
@@ -297,7 +304,8 @@ class RepositoryTemplate
         $template = str_replace('_class_name_', $this->definition->getClass()->getName(), $template);
         $template = str_replace('_short_class_', $this->definition->getClass()->getShortName(), $template);
         $template = str_replace('_table_name_', $this->definition->getTableName(), $template);
-        $template = str_replace('_inline_fields_', trim(implode(",\n", $inlineFields)), $template);
+        $template = str_replace('_inline_bindings_', trim(implode(",\n", $inlineFields)), $template);
+        $template = str_replace('_inline_columns_', trim(implode(",\n", $inlineColumns)), $template);
         $template = str_replace('_inline_field_values_', trim(implode(",\n", $fieldValues)), $template);
         $template = str_replace('_bindings_', trim(implode(",\n", $bindings)), $template);
         $template = str_replace('_array_fields_', trim(implode(",\n", $this->getArrayFields())), $template);
