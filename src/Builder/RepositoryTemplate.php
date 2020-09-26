@@ -22,6 +22,11 @@ class RepositoryTemplate
     
     class _cache_class_name_ extends Repository
     {
+        public function getTable(): string
+        {
+            return '_table_name_';
+        }
+
         /**
          * @inheritDoc
          * @return _short_class_|null

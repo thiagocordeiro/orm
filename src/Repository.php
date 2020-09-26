@@ -15,6 +15,8 @@ abstract class Repository
     private Connection $connection;
     private EntityManager $em;
 
+    abstract public function getTable(): string;
+
     /**
      * @param string|int $id
      * @return T|null

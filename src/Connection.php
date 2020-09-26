@@ -46,33 +46,96 @@ class Connection
     }
 
     /**
-     * @param mixed[] $conditions
+     * @param mixed[] $where
      * @param array<string, string> $order
      * @throws Throwable
      */
     public function select(
         string $table,
-        array $conditions = [],
+        array $where = [],
         array $order = [],
         ?int $limit = null,
         ?int $offset = null
     ): PDOStatement {
-        [$where, $params] = $this->getWhere($conditions);
+        [$_where, $_whereParams] = $this->getWhere($where);
 
         $stmt = $this->pdo()->prepare(
             sprintf(
                 'select * from %s %s %s %s %s',
                 $table,
-                $where,
+                $_where,
                 $this->getOrder($order),
                 $limit ? "limit {$limit}" : '',
                 $offset ? "offset {$offset}" : '',
             )
         );
 
-        $stmt->execute($params);
+        $stmt->execute($_whereParams);
 
         return $stmt;
+    }
+
+    /**
+     * @param array<string, string|int|float> $values
+     */
+    public function insert(string $table, array $values): void
+    {
+        $_fields = [];
+
+        foreach (array_keys($values) as $key) {
+            $_fields[sprintf('`%s`', $key)] = sprintf(':%s', $key);
+        }
+
+        $stmt = $this->pdo()->prepare(
+            sprintf(
+                'INSERT INTO %s (%s) VALUES (%s)',
+                $table,
+                implode(', ', array_keys($_fields)),
+                implode(', ', array_values($_fields)),
+            )
+        );
+
+        $stmt->execute($values);
+    }
+
+    /**
+     * @param array<string, string|int|float> $values
+     * @param array<string, string|int|float> $where
+     */
+    public function update(string $table, array $values, array $where): void
+    {
+        $_fields = array_map(fn (string $field) => sprintf('`%s` = :%s', $field, $field), array_keys($values));
+        [$_where, $_params] = $this->getWhere($where);
+        $_bindings = array_merge($values, $_params);
+
+        $stmt = $this->pdo()->prepare(
+            sprintf(
+                'UPDATE %s SET %s %s',
+                $table,
+                implode(', ', $_fields),
+                $_where,
+            )
+        );
+
+        $stmt->execute($_bindings);
+    }
+
+    /**
+     * @param array<string, string|int|float> $where
+     */
+    public function delete(string $table, array $where): void
+    {
+        [$_where, $_params] = $this->getWhere($where);
+
+        $stmt = $this->pdo()->prepare(
+            sprintf(
+                'DELETE FROM %s %s',
+                $table,
+                $_where,
+            )
+        );
+
+        $stmt->execute($_params);
     }
 
     /**
@@ -167,6 +230,7 @@ class Connection
 
         foreach ($conditions as $column => $value) {
             $column = Inflector::get()->underscore($column);
+            $param = sprintf("w%s", $column);
 
             if (is_null($value)) {
                 $where[] = sprintf('`%s` is null', $column);
@@ -174,11 +238,11 @@ class Connection
                 continue;
             }
 
-            $where[] = sprintf('`%s` = :%s', $column, $column);
-            $params[$column] = $value;
+            $where[] = sprintf('`%s` = :%s', $column, $param);
+            $params[$param] = $value;
         }
 
-        return [sprintf('where %s', implode(' AND ', $where)), $params];
+        return [sprintf('WHERE %s', implode(' AND ', $where)), $params];
     }
 
     /**
