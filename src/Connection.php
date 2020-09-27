@@ -46,7 +46,7 @@ class Connection
     }
 
     /**
-     * @param mixed[] $where
+     * @param array<string, string|int|float|bool|null> $where
      * @param array<string, string> $order
      * @throws Throwable
      */
@@ -76,7 +76,7 @@ class Connection
     }
 
     /**
-     * @param array<string, string|int|float> $values
+     * @param array<string, string|int|float|bool|null> $values
      */
     public function insert(string $table, array $values): void
     {
@@ -99,8 +99,8 @@ class Connection
     }
 
     /**
-     * @param array<string, string|int|float> $values
-     * @param array<string, string|int|float> $where
+     * @param array<string, string|int|float|bool|null> $values
+     * @param array<string, string|int|float|bool|null> $where
      */
     public function update(string $table, array $values, array $where): void
     {
@@ -121,7 +121,7 @@ class Connection
     }
 
     /**
-     * @param array<string, string|int|float> $where
+     * @param array<string, string|int|float|bool|null> $where
      */
     public function delete(string $table, array $where): void
     {
@@ -139,7 +139,7 @@ class Connection
     }
 
     /**
-     * @param mixed[] $params
+     * @param array<string, string|int|float|bool|null> $params
      */
     public function execute(string $statement, array $params = []): PDOStatement
     {
@@ -216,7 +216,7 @@ class Connection
     }
 
     /**
-     * @param mixed[] $conditions
+     * @param array<string, string|int|float|bool|null> $conditions
      * @return mixed[]
      */
     private function getWhere(array $conditions): array
