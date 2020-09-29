@@ -139,7 +139,7 @@ class Connection
     }
 
     /**
-     * @param array<string, string|int|float|bool|null> $params
+     * @param array<string|int, string|int|float|bool|null> $params
      */
     public function execute(string $statement, array $params = []): PDOStatement
     {
