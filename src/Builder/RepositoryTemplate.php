@@ -216,7 +216,7 @@ class RepositoryTemplate
                 $field,
                 'id',
                 sprintf(
-                    "%s\$this->em()->getRepository(\%s::class)->selectBy(['%s_id' => \$item['id']])",
+                    "%siterator_to_array(\$this->em()->getRepository(\%s::class)->selectBy(['%s_id' => \$item['id']]))",
                     $field->getDefinition()->isVariadic() ? '...' : '',
                     str_replace('[]', '', $field->getDefinition()->getType()),
                     underscore(singularize($this->definition->getClass()->getShortName())),
