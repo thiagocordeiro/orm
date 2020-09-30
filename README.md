@@ -1,4 +1,4 @@
-# DDD Orm
+# (DRAFT) DDD Orm
 
 This package allows you to map entity and value objects into database without configuration overhead and runtime reflections
 
