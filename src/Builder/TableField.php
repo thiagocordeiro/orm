@@ -22,6 +22,7 @@ class TableField
     private string $type;
     private PropertyDefinition $definition;
     private ?string $valueObject;
+    private bool $childList;
     private bool $child;
 
     /**
@@ -33,6 +34,7 @@ class TableField
         string $type,
         PropertyDefinition $definition,
         ?string $valueObject = null,
+        bool $childList = false,
         bool $child = false
     ) {
         $this->objectField = $objectField;
@@ -40,6 +42,7 @@ class TableField
         $this->type = $type;
         $this->definition = $definition;
         $this->valueObject = $valueObject;
+        $this->childList = $childList;
         $this->child = $child;
     }
 
@@ -80,6 +83,11 @@ class TableField
     public function getValueObject(): ?string
     {
         return $this->valueObject;
+    }
+
+    public function isChildList(): bool
+    {
+        return $this->childList;
     }
 
     public function isChild(): bool

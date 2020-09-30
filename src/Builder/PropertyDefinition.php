@@ -31,7 +31,7 @@ class PropertyDefinition
         $this->variadic = $param->isVariadic();
         $this->nullable = $param->allowsNull();
         $this->type = $this->searchParamType($class, $param);
-        $this->class = $this->getClassDefinitionByType(str_replace('[]', '', $this->type));
+        $this->class = $this->getClassDefinitionByType(str_replace('[]', '', $this->type), $class);
         $this->getter = sprintf('%s()', $this->searchParamGetter($class, $param, $this->type));
     }
 
@@ -84,6 +84,20 @@ class PropertyDefinition
         return $this->class
             ? $this->class->isEntity()
             : false;
+    }
+
+    public function isChild(): bool
+    {
+        return $this->class
+            ? $this->class->isChild()
+            : false;
+    }
+
+    public function getChildName(): ?string
+    {
+        return $this->class
+            ? $this->class->getChildName()
+            : null;
     }
 
     public function isValueObject(): bool
@@ -246,14 +260,15 @@ class PropertyDefinition
         throw new PropertyHasNoGetter($class, "{$isPrefix} or {$hasPrefix}");
     }
 
-    private function getClassDefinitionByType(string $type): ?ClassDefinition
+    private function getClassDefinitionByType(string $type, ReflectionClass $parent): ?ClassDefinition
     {
         if ($this->checkScalarType($type) || $this->checkArrayType($type)) {
             return null;
         }
 
         return new ClassDefinition(
-            (new BetterReflection())->classReflector()->reflect($type)
+            (new BetterReflection())->classReflector()->reflect($type),
+            $parent
         );
     }
 }

@@ -41,12 +41,26 @@ create table users
     address_id varchar(255) not null
 );
 
-create table nullable_Properties
+create table nullable_properties
 (
     id              varchar(255) not null,
     email           varchar(255),
     height          float,
     amount_value    float,
     amount_currency varchar(255)
-)
+);
+
+create table payments
+(
+    id              varchar(255) not null,
+    amount_value    float        not null,
+    amount_currency varchar(255) not null
+);
+
+create table payment_status
+(
+    payment_id varchar(255) not null,
+    status     varchar(100) not null,
+    at         datetime
+);
 

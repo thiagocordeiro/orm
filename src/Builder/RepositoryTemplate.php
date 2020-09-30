@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Orm\Builder;
 
-use function ICanBoogie\singularize;
 use function ICanBoogie\underscore;
 
 class RepositoryTemplate
@@ -211,7 +210,7 @@ class RepositoryTemplate
         $field = current($objectField);
         $valueObjectClass = $field->getValueObject();
 
-        if ($field->isChild()) {
+        if ($field->isChildList()) {
             return $this->prepareNullableArrayProperty(
                 $field,
                 'id',
@@ -219,8 +218,16 @@ class RepositoryTemplate
                     "%siterator_to_array(\$this->em()->getRepository(\%s::class)->selectBy(['%s_id' => \$item['id']]))",
                     $field->getDefinition()->isVariadic() ? '...' : '',
                     str_replace('[]', '', $field->getDefinition()->getType()),
-                    underscore(singularize($this->definition->getClass()->getShortName())),
+                    underscore($this->definition->getClass()->getShortName()),
                 )
+            );
+        }
+
+        if ($field->isChild()) {
+            return sprintf(
+                "\$this->em()->getRepository(\%s::class)->loadBy(['%s' => \$item['id']])",
+                $field->getDefinition()->getType(),
+                $field->getDefinition()->getChildName()
             );
         }
 

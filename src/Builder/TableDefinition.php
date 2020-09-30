@@ -20,9 +20,6 @@ class TableDefinition
     /** @var Traversable<TableField> */
     private Traversable $tableFields;
 
-    /** @var Traversable<PropertyDefinition> */
-    private Traversable $children;
-
     /**
      * @throws Throwable
      */
@@ -31,7 +28,6 @@ class TableDefinition
         $this->class = $class;
         $this->tableName = $table;
         $this->tableFields = $this->resolveTableFields(...$properties);
-        $this->children = new ArrayObject(array_filter($properties, fn (PropertyDefinition $prop) => $prop->isArray()));
     }
 
     public function getClass(): ClassDefinition
@@ -67,14 +63,6 @@ class TableDefinition
     }
 
     /**
-     * @return Traversable<PropertyDefinition>
-     */
-    public function getChildren(): Traversable
-    {
-        return $this->children;
-    }
-
-    /**
      * @return ArrayObject<int|string, TableField>
      * @throws Throwable
      */
@@ -83,14 +71,15 @@ class TableDefinition
         $array = [];
 
         foreach ($properties as $property) {
-            if ($property->isArray()) {
+            if ($property->isArray() || $property->isChild()) {
                 $array[] = new TableField(
                     $property->getName(),
                     '',
                     'string',
                     $property,
                     null,
-                    true
+                    $property->isArray(),
+                    $property->isChild()
                 );
 
                 continue;
