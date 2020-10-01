@@ -147,7 +147,7 @@ class Connection
 
         return (int) $this->execute(
             sprintf(
-                'select count(*) from %s where %s',
+                'select count(*) from %s %s',
                 $table,
                 $_where
             ),
