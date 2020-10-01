@@ -139,6 +139,23 @@ class Connection
     }
 
     /**
+     * @param array<string, string|int|float|bool|null> $where
+     */
+    public function count(string $table, array $where): int
+    {
+        [$_where, $_params] = $this->getWhere($where);
+
+        return (int) $this->execute(
+            sprintf(
+                'select count(*) from %s where %s',
+                $table,
+                $_where
+            ),
+            $_params
+        )->fetchColumn();
+    }
+
+    /**
      * @param array<string|int, string|int|float|bool|null> $params
      */
     public function execute(string $statement, array $params = []): PDOStatement
