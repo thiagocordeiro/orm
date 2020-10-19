@@ -39,10 +39,8 @@ class RepositoryTemplate
          * @inheritDoc
          * @return _short_class_|null
          */
-        public function loadBy(array $where, array $order = []): ?object
+        public function loadBy(array $where, array $order = _default_order_): ?object
         {
-            $order = empty($order) ? _default_order_ : $order;
-
             return $this->selectOne('_table_name_', $where, $order);
         }
         
@@ -52,12 +50,10 @@ class RepositoryTemplate
          */
         public function selectBy(
             array $where = [],
-            array $order = [],
+            array $order = _default_order_,
             ?int $limit = null,
             ?int $offset = null
         ): Traversable {
-            $order = empty($order) ? _default_order_ : $order;
-
             return $this->select('_table_name_', $where, $order, $limit, $offset);
         }
     
@@ -75,7 +71,7 @@ class RepositoryTemplate
             SQL;
 
             foreach ($entities as $entity) {
-                $this->connection()->execute($statement, [
+                $this->connection->execute($statement, [
                     _bindings_,
                 ]);
             }
@@ -95,7 +91,7 @@ class RepositoryTemplate
             SQL;
 
             foreach ($entities as $entity) {
-                $this->connection()->execute($statement, [
+                $this->connection->execute($statement, [
                     _bindings_,
                 ]);
             }
@@ -111,7 +107,7 @@ class RepositoryTemplate
             SQL;
 
             foreach ($entities as $entity) {
-                $this->connection()->execute($statement, [
+                $this->connection->execute($statement, [
                     'id' => $entity->getId(),
                 ]);
             }
@@ -215,7 +211,7 @@ class RepositoryTemplate
                 $field,
                 'id',
                 sprintf(
-                    "%siterator_to_array(\$this->em()->getRepository(\%s::class)->selectBy(['%s_id' => \$item['id']]))",
+                    "%siterator_to_array(\$this->em->getRepository(\%s::class)->selectBy(['%s_id' => \$item['id']]))",
                     $field->getDefinition()->isVariadic() ? '...' : '',
                     str_replace('[]', '', $field->getDefinition()->getType()),
                     underscore($this->definition->getClass()->getShortName()),
@@ -225,7 +221,7 @@ class RepositoryTemplate
 
         if ($field->isChild()) {
             return sprintf(
-                "\$this->em()->getRepository(\%s::class)->loadBy(['%s' => \$item['id']])",
+                "\$this->em->getRepository(\%s::class)->loadBy(['%s' => \$item['id']])",
                 $field->getDefinition()->getType(),
                 $field->getDefinition()->getChildName()
             );
@@ -236,7 +232,7 @@ class RepositoryTemplate
                 $field,
                 $field->getName(),
                 sprintf(
-                    "\$this->em()->getRepository(\%s::class)->loadById(\$item['%s'])",
+                    "\$this->em->getRepository(\%s::class)->loadById(\$item['%s'])",
                     $field->getDefinition()->getType(),
                     $field->getName()
                 )

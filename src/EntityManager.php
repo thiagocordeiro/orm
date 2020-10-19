@@ -45,6 +45,12 @@ class EntityManager
     {
         $repositoryClassName = str_replace('\\', '_', $class) . 'Repository';
         $repository = "Orm\\Repository\\{$repositoryClassName}";
+        $entityConfig = $this->entityConfig[$class] ?? [];
+        $entityRepository = $entityConfig['repository'] ?? null;
+
+        if (null !== $entityRepository) {
+            return new $entityRepository($this->connection, $this);
+        }
 
         if (!class_exists($repository)) {
             $this->requireClass($repositoryClassName, $class);

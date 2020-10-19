@@ -12,16 +12,10 @@ use Traversable;
  */
 abstract class Repository
 {
-    private Connection $connection;
-    private EntityManager $em;
+    protected Connection $connection;
+    protected EntityManager $em;
 
     abstract public function getTable(): string;
-
-    /**
-     * @param string|int $id
-     * @return T|null
-     */
-    abstract public function loadById($id): ?object;
 
     /**
      * @param mixed[] $where
@@ -63,20 +57,19 @@ abstract class Repository
      */
     abstract public function parseDataIntoObject(array $item): object;
 
-    public function __construct(Connection $connection, EntityManager $factory)
+    final public function __construct(Connection $connection, EntityManager $factory)
     {
         $this->connection = $connection;
         $this->em = $factory;
     }
 
-    public function connection(): Connection
+    /**
+     * @param string|int $id
+     * @return T|null
+     */
+    public function loadById($id): ?object
     {
-        return $this->connection;
-    }
-
-    public function em(): EntityManager
-    {
-        return $this->em;
+        return $this->loadBy(['id' => $id]);
     }
 
     /**
@@ -92,7 +85,7 @@ abstract class Repository
         ?int $limit = null,
         ?int $offset = null
     ): Traversable {
-        $items = $this->connection()->select($from, $where, $order, $limit, $offset);
+        $items = $this->connection->select($from, $where, $order, $limit, $offset);
 
         foreach ($items as $item) {
             yield $this->parseDataIntoObject($item);
@@ -106,7 +99,7 @@ abstract class Repository
      */
     public function selectOne(string $from, array $where, array $order = []): ?object
     {
-        $result = $this->connection()->select($from, $where, $order, 1);
+        $result = $this->connection->select($from, $where, $order, 1);
         $items = iterator_to_array($result);
 
         if (!$items) {
