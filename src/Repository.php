@@ -18,25 +18,6 @@ abstract class Repository
     abstract public function getTable(): string;
 
     /**
-     * @param mixed[] $where
-     * @param array<string, string> $order
-     * @return T|null
-     */
-    abstract public function loadBy(array $where, array $order = []): ?object;
-
-    /**
-     * @param mixed[] $where
-     * @param array<string, string> $order
-     * @return Traversable<T>
-     */
-    abstract public function selectBy(
-        array $where = [],
-        array $order = [],
-        ?int $limit = null,
-        ?int $offset = null
-    ): Traversable;
-
-    /**
      * @param T $entities
      */
     abstract public function insert(object ...$entities): void;
@@ -66,10 +47,33 @@ abstract class Repository
     /**
      * @param string|int $id
      * @return T|null
+     * @throws Throwable
      */
     public function loadById($id): ?object
     {
-        return $this->loadBy(['id' => $id]);
+        return $this->selectOne($this->getTable(), ['id' => $id]);
+    }
+
+    /**
+     * @param mixed[] $where
+     * @param array<string, string> $order
+     * @return T|null
+     * @throws Throwable
+     */
+    public function loadBy(array $where, array $order = []): ?object
+    {
+        return $this->selectOne($this->getTable(), $where, $order);
+    }
+
+    /**
+     * @param mixed[] $where
+     * @param array<string, string> $order
+     * @return Traversable<T>
+     * @throws Throwable
+     */
+    public function selectBy(array $where = [], array $order = [], ?int $limit = null, ?int $offset = null): Traversable
+    {
+        return $this->select($this->getTable(), $where, $order, $limit, $offset);
     }
 
     /**
@@ -96,6 +100,7 @@ abstract class Repository
      * @param mixed[] $where
      * @param array<string, string> $order
      * @return T|null
+     * @throws Throwable
      */
     public function selectOne(string $from, array $where, array $order = []): ?object
     {

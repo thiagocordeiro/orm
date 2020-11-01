@@ -30,15 +30,6 @@ class RepositoryTemplate
          * @inheritDoc
          * @return _short_class_|null
          */
-        public function loadById($id): ?object
-        {
-            return $this->loadBy(['id' => $id]);
-        }
-        
-        /**
-         * @inheritDoc
-         * @return _short_class_|null
-         */
         public function loadBy(array $where, array $order = _default_order_): ?object
         {
             return $this->selectOne('_table_name_', $where, $order);
