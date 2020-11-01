@@ -16,101 +16,71 @@ class RepositoryTemplate
     namespace Orm\Repository;
     
     use Orm\Repository;
-    use Traversable;
-    use _class_name_;
+    use _entity_namespaced_;
+    use Throwable;
     
-    class _cache_class_name_ extends Repository
+    class _repository_name_ extends Repository
     {
         public function getTable(): string
         {
             return '_table_name_';
         }
-
-        /**
-         * @inheritDoc
-         * @return _short_class_|null
-         */
-        public function loadBy(array $where, array $order = _default_order_): ?object
-        {
-            return $this->selectOne('_table_name_', $where, $order);
-        }
         
         /**
-         * @param mixed[] $where
-         * @return Traversable<_short_class_>
+         * @inheritDoc
          */
-        public function selectBy(
-            array $where = [],
-            array $order = _default_order_,
-            ?int $limit = null,
-            ?int $offset = null
-        ): Traversable {
-            return $this->select('_table_name_', $where, $order, $limit, $offset);
-        }
-    
-        /**
-         * @param array<_short_class_> $entities
-         */
-        public function insert(object ...$entities): void
+        public function getOrder(array $order): array
         {
-            $statement = <<<SQL
-                insert into _table_name_ (
-                    _inline_columns_
-                ) values (
-                    _inline_bindings_
-                );
-            SQL;
-
-            foreach ($entities as $entity) {
-                $this->connection->execute($statement, [
-                    _bindings_,
-                ]);
-            }
+            return !empty($order) ? $order : _default_order_;
         }
-    
-        /**
-         * @param array<_short_class_> $entities
-         */
-        public function update(object ...$entities): void
+        
+        public function getColumns(): string
         {
-            $statement = <<<SQL
-                update _table_name_ set
-                    _inline_field_values_
-                where
-                    id = :id
-                ;
-            SQL;
-
-            foreach ($entities as $entity) {
-                $this->connection->execute($statement, [
-                    _bindings_,
-                ]);
-            }
+            return <<<'STRING'
+                _columns_
+            STRING;
         }
-    
-        /**
-         * @param array<_short_class_> $entities
-         */
-        public function delete(object ...$entities): void
+        
+        public function getBindings(): string
         {
-            $statement = <<<SQL
-                delete from _table_name_ where id = :id;
-            SQL;
-
-            foreach ($entities as $entity) {
-                $this->connection->execute($statement, [
-                    'id' => $entity->getId(),
-                ]);
-            }
+            return <<<'STRING'
+                _bindings_
+            STRING;
+        }
+        
+        public function getColumnsEqualBindings(): string
+        {
+            return <<<'STRING'
+                _columns_equal_bindings_
+            STRING;
         }
         
         /**
          * @inheritDoc
-         * @return _short_class_
          */
-        public function parseDataIntoObject(array $item): object
+        public function getDeleteCriteria(object $entity): array
         {
-            return new _short_class_(
+            return ['id' => $entity->getId()];
+        }
+        
+        /**
+         * @inheritDoc
+         */
+        public function entityToDatabaseRow(object $entity): array
+        {
+            return [
+                _object_to_array_,
+            ];
+        }
+
+        /**
+         * @inheritDoc
+         * @return _entity_name_
+         * @throws Throwable
+         */
+        public function databaseRowToEntity(array $item): object
+        {
+            return new _entity_name_(
                 _array_fields_,
             );
         }
@@ -202,7 +172,7 @@ class RepositoryTemplate
                 $field,
                 'id',
                 sprintf(
-                    "%siterator_to_array(\$this->em->getRepository(\%s::class)->selectBy(['%s_id' => \$item['id']]))",
+                    "%siterator_to_array(\$this->em->getRepository(\%s::class)->select(['%s_id' => \$item['id']]))",
                     $field->getDefinition()->isVariadic() ? '...' : '',
                     str_replace('[]', '', $field->getDefinition()->getType()),
                     underscore($this->definition->getClass()->getShortName()),
@@ -269,19 +239,19 @@ class RepositoryTemplate
     public function __toString(): string
     {
         $inlineFields = array_map(
-            fn (TableField $field) => sprintf("%s:%s", str_repeat(' ', 16), $field->getName()),
+            fn (TableField $field) => sprintf("%s:%s", str_repeat(' ', 12), $field->getName()),
             iterator_to_array($this->definition->getTableFields())
         );
 
         $inlineColumns = array_map(
-            fn (TableField $field) => sprintf("%s`%s`", str_repeat(' ', 16), $field->getName()),
+            fn (TableField $field) => sprintf("%s`%s`", str_repeat(' ', 12), $field->getName()),
             iterator_to_array($this->definition->getTableFields())
         );
 
         $fieldValues = array_map(
             fn (TableField $field) => sprintf(
                 "%s`%s` = :%s",
-                str_repeat(' ', 16),
+                str_repeat(' ', 12),
                 $field->getName(),
                 $field->getName()
             ),
@@ -291,7 +261,7 @@ class RepositoryTemplate
         $bindings = array_map(
             fn (TableField $field) => sprintf(
                 "%s'%s' => \$entity->%s",
-                str_repeat(' ', 16),
+                str_repeat(' ', 12),
                 $field->getName(),
                 $field->getDefinition()->getGetter(),
             ),
@@ -299,16 +269,16 @@ class RepositoryTemplate
         );
 
         $template = self::TEMPLATE;
-        $template = str_replace('_cache_class_name_', $this->repositoryName, $template);
-        $template = str_replace('_class_name_', $this->definition->getClass()->getName(), $template);
-        $template = str_replace('_short_class_', $this->definition->getClass()->getShortName(), $template);
-        $template = str_replace('_table_name_', $this->definition->getTableName(), $template);
-        $template = str_replace('_inline_bindings_', trim(implode(",\n", $inlineFields)), $template);
-        $template = str_replace('_inline_columns_', trim(implode(",\n", $inlineColumns)), $template);
-        $template = str_replace('_inline_field_values_', trim(implode(",\n", $fieldValues)), $template);
-        $template = str_replace('_bindings_', trim(implode(",\n", $bindings)), $template);
-        $template = str_replace('_array_fields_', trim(implode(",\n", $this->getArrayFields())), $template);
+        $template = str_replace('_columns_equal_bindings_', trim(implode(",\n", $fieldValues)), $template);
+        $template = str_replace('_entity_namespaced_', $this->definition->getClass()->getName(), $template);
+        $template = str_replace('_object_to_array_', trim(implode(",\n", $bindings)), $template);
+        $template = str_replace('_repository_name_', $this->repositoryName, $template);
         $template = str_replace('_default_order_', $this->getDefaultOrder(), $template);
+        $template = str_replace('_array_fields_', trim(implode(",\n", $this->getArrayFields())), $template);
+        $template = str_replace('_entity_name_', $this->definition->getClass()->getShortName(), $template);
+        $template = str_replace('_table_name_', $this->definition->getTableName(), $template);
+        $template = str_replace('_bindings_', trim(implode(",\n", $inlineFields)), $template);
+        $template = str_replace('_columns_', trim(implode(",\n", $inlineColumns)), $template);
 
         return $template;
     }

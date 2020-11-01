@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Orm;
 
-use Throwable;
 use Traversable;
 
 /**
@@ -18,25 +17,34 @@ abstract class Repository
     abstract public function getTable(): string;
 
     /**
-     * @param T $entities
+     * @param array<string, string> $order
+     * @return array<string, string>
      */
-    abstract public function insert(object ...$entities): void;
+    abstract public function getOrder(array $order): array;
+
+    abstract public function getColumns(): string;
+
+    abstract public function getBindings(): string;
+
+    abstract public function getColumnsEqualBindings(): string;
 
     /**
-     * @param T $entities
+     * @param T $entity
+     * @return array<string, mixed>
      */
-    abstract public function update(object ...$entities): void;
+    abstract public function getDeleteCriteria(object $entity): array;
 
     /**
-     * @param T $entities
+     * @param T $entity
+     * @return array<string, mixed>
      */
-    abstract public function delete(object ...$entities): void;
+    abstract public function entityToDatabaseRow(object $entity): array;
 
     /**
      * @param mixed[] $item
      * @return T
      */
-    abstract public function parseDataIntoObject(array $item): object;
+    abstract public function databaseRowToEntity(array $item): object;
 
     final public function __construct(Connection $connection, EntityManager $factory)
     {
@@ -47,72 +55,98 @@ abstract class Repository
     /**
      * @param string|int $id
      * @return T|null
-     * @throws Throwable
      */
     public function loadById($id): ?object
     {
-        return $this->selectOne($this->getTable(), ['id' => $id]);
+        return $this->selectOne(['id' => $id]);
     }
 
     /**
-     * @param mixed[] $where
+     * @param array<string, string|int|float|bool|null> $where
      * @param array<string, string> $order
      * @return T|null
-     * @throws Throwable
      */
     public function loadBy(array $where, array $order = []): ?object
     {
-        return $this->selectOne($this->getTable(), $where, $order);
+        return $this->selectOne($where, $this->getOrder($order));
     }
 
     /**
-     * @param mixed[] $where
+     * @param array<string, string|int|float|bool|null> $where
      * @param array<string, string> $order
      * @return Traversable<T>
-     * @throws Throwable
      */
-    public function selectBy(array $where = [], array $order = [], ?int $limit = null, ?int $offset = null): Traversable
+    public function select(array $where = [], array $order = [], ?int $limit = null, ?int $offset = null): Traversable
     {
-        return $this->select($this->getTable(), $where, $order, $limit, $offset);
-    }
-
-    /**
-     * @param mixed[] $where
-     * @param array<string, string> $order
-     * @return Traversable<T>
-     * @throws Throwable
-     */
-    public function select(
-        string $from,
-        array $where,
-        array $order = [],
-        ?int $limit = null,
-        ?int $offset = null
-    ): Traversable {
-        $items = $this->connection->select($from, $where, $order, $limit, $offset);
+        $items = $this->connection->select($this->getTable(), $where, $this->getOrder($order), $limit, $offset);
 
         foreach ($items as $item) {
-            yield $this->parseDataIntoObject($item);
+            yield $this->databaseRowToEntity($item);
         }
     }
 
     /**
-     * @param mixed[] $where
+     * @param array<string, string|int|float|bool|null> $where
      * @param array<string, string> $order
      * @return T|null
-     * @throws Throwable
      */
-    public function selectOne(string $from, array $where, array $order = []): ?object
+    public function selectOne(array $where, array $order = []): ?object
     {
-        $result = $this->connection->select($from, $where, $order, 1);
+        $result = $this->connection->select($this->getTable(), $where, $this->getOrder($order), 1);
         $items = iterator_to_array($result);
 
         if (!$items) {
             return null;
         }
 
-        return $this->parseDataIntoObject(
+        return $this->databaseRowToEntity(
             current($items)
         );
+    }
+
+    /**
+     * @param T ...$entities
+     */
+    public function insert(object ...$entities): void
+    {
+        $statement = "
+            INSERT INTO {$this->getTable()} (
+                {$this->getColumns()}
+            ) values (
+                {$this->getBindings()}
+            );
+        ";
+
+        foreach ($entities as $entity) {
+            $this->connection->execute($statement, $this->entityToDatabaseRow($entity));
+        }
+    }
+
+    /**
+     * @param T ...$entities
+     */
+    public function update(object ...$entities): void
+    {
+        $statement = "
+            UPDATE {$this->getTable()} SET
+                {$this->getColumnsEqualBindings()}
+            WHERE id = :id
+        ";
+
+        foreach ($entities as $entity) {
+            $this->connection->execute($statement, $this->entityToDatabaseRow($entity));
+        }
+    }
+
+    /**
+     * @param T ...$entities
+     */
+    public function delete(object ...$entities): void
+    {
+        $statement = "DELETE FROM {$this->getTable()} WHERE id = :id";
+
+        foreach ($entities as $entity) {
+            $this->connection->execute($statement, $this->getDeleteCriteria($entity));
+        }
     }
 }

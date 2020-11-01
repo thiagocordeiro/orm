@@ -113,7 +113,7 @@ class RepositoryFactoryTest extends IntegrationTestCase
         $repository->insert(new Address('address-3', 'Leidseplein', '900', $this->now));
         $repository->insert(new Address('address-4', 'Keizersgracht', '1200', $this->now));
 
-        $entities = $repository->selectBy(['street' => 'Leidseplein']);
+        $entities = $repository->select(['street' => 'Leidseplein']);
 
         $this->assertEquals([
             new Address('address-2', 'Leidseplein', '500', $this->now),
@@ -132,7 +132,7 @@ class RepositoryFactoryTest extends IntegrationTestCase
         $repository->insert(new Address('address-3', 'Leidseplein', '900', $this->now));
         $repository->insert(new Address('address-4', 'Keizersgracht', '1200', $this->now));
 
-        $entities = $repository->select('addresses', [], ['id' => 'desc'], 2);
+        $entities = $repository->select([], ['id' => 'desc'], 2);
 
         $this->assertEquals([
             new Address('address-4', 'Keizersgracht', '1200', $this->now),
