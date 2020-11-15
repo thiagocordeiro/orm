@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Orm\Builder;
 
+use Exception;
 use ICanBoogie\Inflector;
+use OutOfBoundsException;
 use Roave\BetterReflection\Reflection\ReflectionClass;
 use Roave\BetterReflection\Reflection\ReflectionParameter;
 
@@ -70,8 +72,16 @@ class ClassDefinition
 
     private function findOutClassType(ReflectionClass $class, ?ReflectionClass $parent = null): string
     {
+        try {
+            $constructor = $class->getConstructor();
+        } catch (OutOfBoundsException $e) {
+            throw new Exception(
+                sprintf('Unable to create ORM repository, %s::__constructor does not exist', $class->getName())
+            );
+        }
+
         /** @var ReflectionParameter[] $properties */
-        $properties = $class->getConstructor()->getParameters();
+        $properties = $constructor->getParameters();
 
         foreach ($properties as $property) {
             if ($property->getName() === 'id') {
