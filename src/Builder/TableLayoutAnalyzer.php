@@ -23,9 +23,10 @@ class TableLayoutAnalyzer
     public function __construct(string $className, bool $pluralized, ?string $table = null)
     {
         $class = (new BetterReflection())->classReflector()->reflect($className);
-        $constructor = $class->getConstructor();
-
-        if (!$constructor instanceof ReflectionMethod) {
+        
+        try {
+            $constructor = $class->getConstructor();
+        } catch (Throwable $e) {
             throw new ClassMustHaveAConstructor($className);
         }
 
