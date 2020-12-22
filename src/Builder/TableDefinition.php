@@ -7,8 +7,7 @@ namespace Orm\Builder;
 use ArrayObject;
 use DateTimeInterface;
 use Exception;
-use Roave\BetterReflection\BetterReflection;
-use Roave\BetterReflection\Reflection\ReflectionParameter;
+use ReflectionParameter;
 use Throwable;
 use Traversable;
 
@@ -137,7 +136,7 @@ class TableDefinition
             return [];
         }
 
-        $reflection = (new BetterReflection())->classReflector()->reflect($classDefinition->getName());
+        $reflection = new ReflectionClass($classDefinition->getName());
 
         if ($reflection->implementsInterface(DateTimeInterface::class)) {
             if ($voProperty->isNullable()) {
@@ -228,7 +227,7 @@ class TableDefinition
             $classDefinition = $prop->getClassDefinition();
 
             if ($classDefinition instanceof ClassDefinition) {
-                $class = (new BetterReflection())->classReflector()->reflect($classDefinition->getName());
+                $class = new ReflectionClass($classDefinition->getName());
 
                 $properties = array_map(
                     fn (ReflectionParameter $param) => new PropertyDefinition($class, $param),

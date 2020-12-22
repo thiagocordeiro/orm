@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Orm\Exception;
 
 use Exception;
-use Roave\BetterReflection\Reflection\ReflectionClass;
-use Roave\BetterReflection\Reflection\ReflectionParameter;
+use Orm\Builder\ReflectionClass;
+use ReflectionParameter;
 
 class ArrayPropertyMustHaveAnArrayAnnotation extends Exception
 {

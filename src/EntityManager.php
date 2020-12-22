@@ -60,6 +60,7 @@ class EntityManager
     }
 
     /**
+     * @param class-string $class
      * @throws ClassMustHaveAConstructor
      * @throws Throwable
      */
@@ -75,6 +76,7 @@ class EntityManager
     }
 
     /**
+     * @param class-string $class
      * @throws ClassMustHaveAConstructor
      * @throws Throwable
      */

@@ -5,11 +5,8 @@ declare(strict_types=1);
 namespace Orm\Builder;
 
 use ICanBoogie\Inflector;
-use Orm\Exception\ClassMustHaveAConstructor;
-use Roave\BetterReflection\BetterReflection;
-use Roave\BetterReflection\Reflection\ReflectionClass;
-use Roave\BetterReflection\Reflection\ReflectionMethod;
-use Roave\BetterReflection\Reflection\ReflectionParameter;
+use ReflectionException;
+use ReflectionParameter;
 use Throwable;
 
 class TableLayoutAnalyzer
@@ -18,17 +15,12 @@ class TableLayoutAnalyzer
     private string $table;
 
     /**
-     * @throws ClassMustHaveAConstructor
+     * @param class-string $className
+     * @throws ReflectionException
      */
     public function __construct(string $className, bool $pluralized, ?string $table = null)
     {
-        $class = (new BetterReflection())->classReflector()->reflect($className);
-        
-        try {
-            $constructor = $class->getConstructor();
-        } catch (Throwable $e) {
-            throw new ClassMustHaveAConstructor($className);
-        }
+        $class = new ReflectionClass($className);
 
         $this->class = $class;
         $this->table = $table ?? $this->resolveTableName($this->class->getShortName(), $pluralized);
