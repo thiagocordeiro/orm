@@ -6,11 +6,12 @@ namespace Orm\Builder;
 
 use Orm\Exception\ArrayPropertyMustHaveAnArrayAnnotation;
 use Orm\Exception\ArrayPropertyMustHaveATypeAnnotation;
+use Orm\Exception\ClassMustHaveAConstructor;
 use Orm\Exception\PropertyHasNoGetter;
 use Orm\Exception\PropertyMustHaveAType;
-use Roave\BetterReflection\BetterReflection;
-use Roave\BetterReflection\Reflection\ReflectionClass;
-use Roave\BetterReflection\Reflection\ReflectionParameter;
+use ReflectionException;
+use ReflectionNamedType;
+use ReflectionParameter;
 use Throwable;
 
 class PropertyDefinition
@@ -129,10 +130,13 @@ class PropertyDefinition
      * @throws ArrayPropertyMustHaveATypeAnnotation
      * @throws ArrayPropertyMustHaveAnArrayAnnotation
      * @throws PropertyMustHaveAType
+     * @throws ClassMustHaveAConstructor
      */
     private function searchParamType(ReflectionClass $class, ReflectionParameter $param): string
     {
-        $type = (string) $param->getType();
+        $refType = $param->getType();
+        assert($refType instanceof ReflectionNamedType);
+        $type = $refType->getName();
 
         if ('' === $type) {
             throw new PropertyMustHaveAType($param, $class);
@@ -152,6 +156,7 @@ class PropertyDefinition
     /**
      * @throws ArrayPropertyMustHaveATypeAnnotation
      * @throws ArrayPropertyMustHaveAnArrayAnnotation
+     * @throws ClassMustHaveAConstructor
      */
     private function searchArrayType(ReflectionParameter $param, ReflectionClass $class): string
     {
@@ -164,6 +169,7 @@ class PropertyDefinition
     /**
      * @throws ArrayPropertyMustHaveATypeAnnotation
      * @throws ArrayPropertyMustHaveAnArrayAnnotation
+     * @throws ClassMustHaveAConstructor
      */
     private function searchTypeOnDocComment(ReflectionParameter $param, ReflectionClass $class): string
     {
@@ -218,6 +224,7 @@ class PropertyDefinition
 
     /**
      * @throws PropertyHasNoGetter
+     * @throws ClassMustHaveAConstructor
      */
     private function searchParamGetter(ReflectionClass $class, ReflectionParameter $param, string $type): string
     {
@@ -260,15 +267,15 @@ class PropertyDefinition
         throw new PropertyHasNoGetter($class, "{$isPrefix} or {$hasPrefix}");
     }
 
+    /**
+     * @throws ReflectionException
+     */
     private function getClassDefinitionByType(string $type, ReflectionClass $parent): ?ClassDefinition
     {
         if ($this->checkScalarType($type) || $this->checkArrayType($type)) {
             return null;
         }
 
-        return new ClassDefinition(
-            (new BetterReflection())->classReflector()->reflect($type),
-            $parent
-        );
+        return new ClassDefinition(new ReflectionClass($type), $parent);
     }
 }

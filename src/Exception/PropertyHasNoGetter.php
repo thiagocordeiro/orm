@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Orm\Exception;
 
 use Exception;
-use Roave\BetterReflection\Reflection\ReflectionClass;
+use Orm\Builder\ReflectionClass;
 
 class PropertyHasNoGetter extends Exception
 {

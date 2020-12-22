@@ -7,8 +7,7 @@ namespace Orm\Builder;
 use Exception;
 use ICanBoogie\Inflector;
 use OutOfBoundsException;
-use Roave\BetterReflection\Reflection\ReflectionClass;
-use Roave\BetterReflection\Reflection\ReflectionParameter;
+use ReflectionNamedType;
 
 class ClassDefinition
 {
@@ -80,15 +79,14 @@ class ClassDefinition
             );
         }
 
-        /** @var ReflectionParameter[] $properties */
         $properties = $constructor->getParameters();
 
         foreach ($properties as $property) {
             if ($property->getName() === 'id') {
                 $idType = $property->getType();
 
-                $this->idType = $idType
-                    ? (string) $idType
+                $this->idType = $idType instanceof ReflectionNamedType
+                    ? $idType->getName()
                     : null;
 
                 return self::CLASS_TYPE_ENTITY;
