@@ -238,6 +238,12 @@ class PropertyDefinition
             return $getter;
         }
 
+        $propertyMethod = $param->getName();
+
+        if ($class->hasMethod($propertyMethod)) {
+            return $propertyMethod;
+        }
+
         $numParams = count($class->getConstructor()->getParameters());
 
         if ($numParams === 1 && $class->hasMethod('__toString')) {
@@ -262,6 +268,12 @@ class PropertyDefinition
 
         if (true === $class->hasMethod($hasPrefix)) {
             return $hasPrefix;
+        }
+
+        $noPrefix = $param->getName();
+
+        if (true === $class->hasMethod($noPrefix)) {
+            return $noPrefix;
         }
 
         throw new PropertyHasNoGetter($class, "{$isPrefix} or {$hasPrefix}");

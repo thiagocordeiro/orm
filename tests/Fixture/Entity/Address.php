@@ -11,6 +11,7 @@ class Address
     private string $id;
     private string $street;
     private string $number;
+    private bool $main;
     private DateTimeImmutable $createdAt;
     private ?DateTimeImmutable $deletedAt;
 
@@ -18,12 +19,14 @@ class Address
         string $id,
         string $street,
         string $number,
+        bool $main,
         DateTimeImmutable $createdAt,
         ?DateTimeImmutable $deletedAt = null
     ) {
         $this->id = $id;
         $this->street = $street;
         $this->number = $number;
+        $this->main = $main;
         $this->createdAt = $createdAt;
         $this->deletedAt = $deletedAt;
     }
@@ -41,6 +44,11 @@ class Address
     public function getNumber(): string
     {
         return $this->number;
+    }
+
+    public function main(): bool
+    {
+        return $this->main;
     }
 
     public function getCreatedAt(): DateTimeImmutable

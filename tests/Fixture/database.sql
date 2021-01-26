@@ -4,6 +4,7 @@ create table addresses
     street     varchar(255) not null,
     number     varchar(255) not null,
     created_at datetime     not null,
+    main       tinyint      not null,
     deleted_at datetime
 );
 

@@ -36,7 +36,7 @@ class RepositoryFactoryTest extends IntegrationTestCase
      */
     public function testInsertAndRetrieveOrder(): void
     {
-        $address = new Address('address-1', 'Centraal Station Straat', '1234', $this->now);
+        $address = new Address('address-1', 'Centraal Station Straat', '1234', true, $this->now);
         $user = new User('user-1', new Email('thiago@thiago.com'), new Height(1.75), new Age(31), true, $address);
         $product1 = new Product('prod-1', new Amount(100, Currency::EUR()));
         $product2 = new Product('prod-2', new Amount(20, Currency::EUR()));
@@ -64,7 +64,7 @@ class RepositoryFactoryTest extends IntegrationTestCase
     public function testDeleteAddress(): void
     {
         $repository = $this->em->getRepository(Address::class);
-        $address = new Address('address-1', 'Centraal Station Straat', '1234', $this->now);
+        $address = new Address('address-1', 'Centraal Station Straat', '1234', true, $this->now);
         $repository->insert($address);
 
         $repository->delete($address);
@@ -78,9 +78,9 @@ class RepositoryFactoryTest extends IntegrationTestCase
     public function testUpdateAddress(): void
     {
         $repository = $this->em->getRepository(Address::class);
-        $repository->insert(new Address('address-1', 'Centraal Station Straat', '1234', $this->now));
+        $repository->insert(new Address('address-1', 'Centraal Station Straat', '1234', true, $this->now));
 
-        $updated = new Address('address-1', 'Zuid Straat', '1234', $this->now);
+        $updated = new Address('address-1', 'Zuid Straat', '1234', true, $this->now);
         $repository->update($updated);
 
         $this->assertEquals($updated, $repository->loadById('address-1'));
@@ -92,14 +92,14 @@ class RepositoryFactoryTest extends IntegrationTestCase
     public function testLoadAddressBy(): void
     {
         $repository = $this->em->getRepository(Address::class);
-        $repository->insert(new Address('address-1', 'Centraal Station Straat', '1234', $this->now));
-        $repository->insert(new Address('address-2', 'Leidseplein', '500', $this->now));
-        $repository->insert(new Address('address-3', 'Leidseplein', '900', $this->now));
-        $repository->insert(new Address('address-4', 'Keizersgracht', '1200', $this->now));
+        $repository->insert(new Address('address-1', 'Centraal Station Straat', '1234', true, $this->now));
+        $repository->insert(new Address('address-2', 'Leidseplein', '500', false, $this->now));
+        $repository->insert(new Address('address-3', 'Leidseplein', '900', true, $this->now));
+        $repository->insert(new Address('address-4', 'Keizersgracht', '1200', true, $this->now));
 
         $entity = $repository->loadBy(['number' => '500']);
 
-        $this->assertEquals(new Address('address-2', 'Leidseplein', '500', $this->now), $entity);
+        $this->assertEquals(new Address('address-2', 'Leidseplein', '500', false, $this->now), $entity);
     }
 
     /**
@@ -108,16 +108,16 @@ class RepositoryFactoryTest extends IntegrationTestCase
     public function testSelectAddressBy(): void
     {
         $repository = $this->em->getRepository(Address::class);
-        $repository->insert(new Address('address-1', 'Centraal Station Straat', '1234', $this->now));
-        $repository->insert(new Address('address-2', 'Leidseplein', '500', $this->now));
-        $repository->insert(new Address('address-3', 'Leidseplein', '900', $this->now));
-        $repository->insert(new Address('address-4', 'Keizersgracht', '1200', $this->now));
+        $repository->insert(new Address('address-1', 'Centraal Station Straat', '1234', true, $this->now));
+        $repository->insert(new Address('address-2', 'Leidseplein', '500', true, $this->now));
+        $repository->insert(new Address('address-3', 'Leidseplein', '900', true, $this->now));
+        $repository->insert(new Address('address-4', 'Keizersgracht', '1200', true, $this->now));
 
         $entities = $repository->select(['street' => 'Leidseplein']);
 
         $this->assertEquals([
-            new Address('address-2', 'Leidseplein', '500', $this->now),
-            new Address('address-3', 'Leidseplein', '900', $this->now),
+            new Address('address-2', 'Leidseplein', '500', true, $this->now),
+            new Address('address-3', 'Leidseplein', '900', true, $this->now),
         ], iterator_to_array($entities));
     }
 
@@ -127,16 +127,16 @@ class RepositoryFactoryTest extends IntegrationTestCase
     public function testSelectLimitedAddress(): void
     {
         $repository = $this->em->getRepository(Address::class);
-        $repository->insert(new Address('address-1', 'Centraal Station Straat', '1234', $this->now));
-        $repository->insert(new Address('address-2', 'Leidseplein', '500', $this->now));
-        $repository->insert(new Address('address-3', 'Leidseplein', '900', $this->now));
-        $repository->insert(new Address('address-4', 'Keizersgracht', '1200', $this->now));
+        $repository->insert(new Address('address-1', 'Centraal Station Straat', '1234', true, $this->now));
+        $repository->insert(new Address('address-2', 'Leidseplein', '500', true, $this->now));
+        $repository->insert(new Address('address-3', 'Leidseplein', '900', true, $this->now));
+        $repository->insert(new Address('address-4', 'Keizersgracht', '1200', true, $this->now));
 
         $entities = $repository->select([], ['id' => 'desc'], 2);
 
         $this->assertEquals([
-            new Address('address-4', 'Keizersgracht', '1200', $this->now),
-            new Address('address-3', 'Leidseplein', '900', $this->now),
+            new Address('address-4', 'Keizersgracht', '1200', true, $this->now),
+            new Address('address-3', 'Leidseplein', '900', true, $this->now),
         ], iterator_to_array($entities));
     }
 }
