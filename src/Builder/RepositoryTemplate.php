@@ -260,7 +260,7 @@ class RepositoryTemplate
 
         $bindings = array_map(
             fn (TableField $field) => sprintf(
-                "%s'%s' => \$entity->%s",
+                "%s'%s' => \$entity->%s" . ($field->isBoolean() ? ' ? 1 : 0' : ''),
                 str_repeat(' ', 12),
                 $field->getName(),
                 $field->getDefinition()->getGetter(),

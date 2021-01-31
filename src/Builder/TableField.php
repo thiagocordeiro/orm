@@ -99,4 +99,9 @@ class TableField
     {
         return in_array($this->type, self::TYPES);
     }
+
+    public function isBoolean(): bool
+    {
+        return $this->type === 'bool';
+    }
 }
