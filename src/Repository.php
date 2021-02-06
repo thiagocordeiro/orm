@@ -94,14 +94,13 @@ abstract class Repository
     {
         $result = $this->connection->select($this->getTable(), $where, $this->getOrder($order), 1);
         $items = iterator_to_array($result);
+        $item = current($items);
 
-        if (!$items) {
+        if (!$item) {
             return null;
         }
 
-        return $this->databaseRowToEntity(
-            current($items)
-        );
+        return $this->databaseRowToEntity($item);
     }
 
     /**
