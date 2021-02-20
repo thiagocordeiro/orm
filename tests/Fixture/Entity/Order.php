@@ -16,12 +16,20 @@ class Order
     /** @var OrderProduct[] */
     private array $products;
 
-    public function __construct(string $id, User $user, Amount $total, OrderProduct ...$products)
+    /** @var OrderStore[] */
+    private array $stores;
+
+    /**
+     * @param OrderProduct[] $products
+     * @param OrderStore[] $stores
+     */
+    public function __construct(string $id, User $user, Amount $total, array $products, array $stores)
     {
         $this->id = $id;
         $this->user = $user;
         $this->total = $total;
         $this->products = $products;
+        $this->stores = $stores;
     }
 
     public function getId(): string
@@ -45,5 +53,13 @@ class Order
     public function getProducts(): array
     {
         return $this->products;
+    }
+
+    /**
+     * @return OrderStore[]
+     */
+    public function getStores(): array
+    {
+        return $this->stores;
     }
 }

@@ -19,7 +19,7 @@ use Test\Orm\Fixture\Vo\Height;
 use Test\Orm\Fixture\Vo\OrderProduct;
 use Throwable;
 
-class RepositoryFactoryTest extends IntegrationTestCase
+class ParsingTest extends IntegrationTestCase
 {
     private DateTimeImmutable $now;
 
@@ -43,7 +43,7 @@ class RepositoryFactoryTest extends IntegrationTestCase
 
         $orderProduct1 = new OrderProduct(2, 'order-1', $product1, $product1->getPrice());
         $orderProduct2 = new OrderProduct(5, 'order-1', $product2, $product1->getPrice());
-        $order = new Order('order-1', $user, new Amount(300, Currency::EUR()), ...[$orderProduct1, $orderProduct2]);
+        $order = new Order('order-1', $user, new Amount(300, Currency::EUR()), [$orderProduct1, $orderProduct2], []);
 
         $this->em->getRepository(Address::class)->insert($address);
         $this->em->getRepository(User::class)->insert($user);

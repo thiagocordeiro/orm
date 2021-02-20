@@ -32,6 +32,13 @@ create table products
     price_currency varchar(255) not null
 );
 
+create table order_stores
+(
+    id       varchar(255) not null,
+    order_id varchar(255) not null,
+    name     varchar(255)
+);
+
 create table users
 (
     id         varchar(255) not null,

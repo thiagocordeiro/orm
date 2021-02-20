@@ -53,7 +53,7 @@ class TableDefinition
     public function getTableFields(): Traversable
     {
         foreach ($this->tableFields as $field) {
-            if ($field->isChild()) {
+            if ($field->isChild() || $field->isChildList()) {
                 continue;
             }
 
@@ -73,7 +73,7 @@ class TableDefinition
             if ($property->isArray() || $property->isChild()) {
                 $array[] = new TableField(
                     $property->getName(),
-                    '',
+                    $property->getName(),
                     'string',
                     $property,
                     null,

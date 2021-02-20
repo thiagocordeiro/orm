@@ -18,6 +18,7 @@ class PropertyDefinition
 {
     private string $name;
     private bool $variadic;
+    private bool $array;
     private bool $nullable;
     private string $type;
     private string $getter;
@@ -34,6 +35,7 @@ class PropertyDefinition
         $this->type = $this->searchParamType($class, $param);
         $this->class = $this->getClassDefinitionByType(str_replace('[]', '', $this->type), $class);
         $this->getter = sprintf('%s()', $this->searchParamGetter($class, $param, $this->type));
+        $this->array = $this->checkArrayType($this->type) || $this->variadic;
     }
 
     public function getName(): string
@@ -67,7 +69,7 @@ class PropertyDefinition
 
     public function isArray(): bool
     {
-        return $this->checkArrayType($this->type) || $this->variadic;
+        return $this->array;
     }
 
     public function isVariadic(): bool
