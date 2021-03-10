@@ -109,4 +109,14 @@ class RepositoryTest extends IntegrationTestCase
             ),
         );
     }
+
+    public function testExists(): void
+    {
+        $repository = $this->em->getRepository(User::class);
+
+        $repository->insert($this->order->getUser());
+
+        $this->assertTrue($repository->exists(['id' => 'user-1']));
+        $this->assertFalse($repository->exists(['id' => 'foo-bar']));
+    }
 }

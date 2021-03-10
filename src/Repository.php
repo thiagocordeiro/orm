@@ -73,6 +73,18 @@ abstract class Repository
 
     /**
      * @param array<string, string|int|float|bool|null> $where
+     */
+    public function exists(array $where = []): bool
+    {
+        $result = $this->connection->select($this->getTable(), $where, [], 1);
+        $items = iterator_to_array($result);
+        $item = current($items);
+
+        return $item !== false;
+    }
+
+    /**
+     * @param array<string, string|int|float|bool|null> $where
      * @param array<string, string> $order
      * @return Traversable<T>
      */
