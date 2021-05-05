@@ -57,6 +57,7 @@ class RepositoryTemplate
         
         /**
          * @inheritDoc
+         * @param _entity_name_ $entity
          */
         public function getDeleteCriteria(object $entity): array
         {
@@ -65,6 +66,7 @@ class RepositoryTemplate
         
         /**
          * @inheritDoc
+         * @param _entity_name_ $entity
          */
         public function entityToDatabaseRow(object $entity): array
         {
@@ -182,7 +184,8 @@ class RepositoryTemplate
 
         if ($field->isChild()) {
             return sprintf(
-                "\$this->em->getRepository(\%s::class)->loadBy(['%s' => \$item['id']])",
+                "%s\$this->em->getRepository(\%s::class)->loadBy(['%s' => \$item['id']])",
+                str_repeat(' ', 12),
                 $field->getDefinition()->getType(),
                 $field->getDefinition()->getChildName()
             );
