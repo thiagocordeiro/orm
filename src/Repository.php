@@ -46,7 +46,7 @@ abstract class Repository
      */
     abstract public function databaseRowToEntity(array $item): object;
 
-    final public function __construct(Connection $connection, EntityManager $factory)
+    public function __construct(Connection $connection, EntityManager $factory)
     {
         $this->connection = $connection;
         $this->em = $factory;
