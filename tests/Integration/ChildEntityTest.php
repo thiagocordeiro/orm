@@ -33,7 +33,7 @@ class ChildEntityTest extends IntegrationTestCase
             new Payment(
                 $id,
                 new Amount(100, 'EUR'),
-                new PaymentStatus($id, 'opened', $this->now)
+                new PaymentStatus($id, 'opened', $this->now),
             ),
             $this->em->getRepository(Payment::class)->loadById($id),
         );

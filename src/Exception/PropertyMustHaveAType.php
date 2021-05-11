@@ -16,8 +16,8 @@ class PropertyMustHaveAType extends Exception
             sprintf(
                 'Property %s::%s must have a type',
                 $class->getName(),
-                $param->getName()
-            )
+                $param->getName(),
+            ),
         );
     }
 }

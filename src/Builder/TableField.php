@@ -35,7 +35,7 @@ class TableField
         PropertyDefinition $definition,
         ?string $valueObject = null,
         bool $childList = false,
-        bool $child = false
+        bool $child = false,
     ) {
         $this->objectField = $objectField;
         $this->name = Inflector::get()->underscore($name);
@@ -97,7 +97,7 @@ class TableField
 
     public function isScalar(): bool
     {
-        return in_array($this->type, self::TYPES);
+        return in_array($this->type, self::TYPES, true);
     }
 
     public function isBoolean(): bool

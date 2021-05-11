@@ -53,10 +53,9 @@ abstract class Repository
     }
 
     /**
-     * @param string|int $id
      * @return T|null
      */
-    public function loadById($id): ?object
+    public function loadById(string|int $id): ?object
     {
         return $this->selectOne(['id' => $id]);
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Test\Orm\Config;
 
 use Orm\Connection;
@@ -26,9 +28,7 @@ class IntegrationTestCase extends TestCase
             $connection,
             'var/cache/orm/',
             true,
-            [
-                PaymentStatus::class => ['table' => 'payment_status', 'order' => ['at' => 'desc']],
-            ]
+            [PaymentStatus::class => ['table' => 'payment_status', 'order' => ['at' => 'desc']]],
         );
     }
 }

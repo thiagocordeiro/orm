@@ -15,8 +15,8 @@ class PropertyHasNoGetter extends Exception
             sprintf(
                 'Class %s must have a method %s',
                 $class->getName(),
-                $getter
-            )
+                $getter,
+            ),
         );
     }
 }

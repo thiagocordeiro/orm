@@ -55,7 +55,7 @@ class Connection
         array $where = [],
         array $order = [],
         ?int $limit = null,
-        ?int $offset = null
+        ?int $offset = null,
     ): PDOStatement {
         [$_where, $_whereParams] = $this->getWhere($where);
 
@@ -67,7 +67,7 @@ class Connection
                 $this->getOrder($order),
                 $limit ? "limit {$limit}" : '',
                 $offset ? "offset {$offset}" : '',
-            )
+            ),
         );
 
         $stmt->execute($_whereParams);
@@ -92,7 +92,7 @@ class Connection
                 $table,
                 implode(', ', array_keys($_fields)),
                 implode(', ', array_values($_fields)),
-            )
+            ),
         );
 
         $stmt->execute($values);
@@ -114,7 +114,7 @@ class Connection
                 $table,
                 implode(', ', $_fields),
                 $_where,
-            )
+            ),
         );
 
         $stmt->execute($_bindings);
@@ -132,7 +132,7 @@ class Connection
                 'DELETE FROM %s %s',
                 $table,
                 $_where,
-            )
+            ),
         );
 
         $stmt->execute($_params);
@@ -149,9 +149,9 @@ class Connection
             sprintf(
                 'select count(*) from %s %s',
                 $table,
-                $_where
+                $_where,
             ),
-            $_params
+            $_params,
         )->fetchColumn();
     }
 
@@ -172,10 +172,9 @@ class Connection
     }
 
     /**
-     * @return mixed
      * @throws Throwable
      */
-    public function transaction(callable $fn)
+    public function transaction(callable $fn): mixed
     {
         $this->beginTransaction();
 
@@ -229,7 +228,7 @@ class Connection
 
     private function supportsNestedTransaction(): bool
     {
-        return in_array($this->pdo()->getAttribute(PDO::ATTR_DRIVER_NAME), ['mysql', 'pgsql']);
+        return in_array($this->pdo()->getAttribute(PDO::ATTR_DRIVER_NAME), ['mysql', 'pgsql'], true);
     }
 
     /**
@@ -275,7 +274,7 @@ class Connection
         $ordering = [];
 
         foreach ($order as $field => $direction) {
-            if (false === in_array(strtolower($direction), ['asc', 'desc'])) {
+            if (false === in_array(strtolower($direction), ['asc', 'desc'], true)) {
                 throw new Exception(sprintf('Invalid sql ordering (%s %s)', $field, $direction));
             }
 

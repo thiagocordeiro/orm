@@ -78,7 +78,7 @@ class TableDefinition
                     $property,
                     null,
                     $property->isArray(),
-                    $property->isChild()
+                    $property->isChild(),
                 );
 
                 continue;
@@ -95,8 +95,8 @@ class TableDefinition
                                 '%s ? $entity->%s->getId() : null',
                                 $property->getGetter(),
                                 $property->getGetter(),
-                            )
-                        )
+                            ),
+                        ),
                     );
 
                     continue;
@@ -106,7 +106,7 @@ class TableDefinition
                     $property->getName(),
                     sprintf('%s_id', $property->getName()),
                     $property->getIdType(),
-                    $property->withGetter(sprintf('%s->getId()', $property->getGetter()))
+                    $property->withGetter(sprintf('%s->getId()', $property->getGetter())),
                 );
 
                 continue;
@@ -150,9 +150,9 @@ class TableDefinition
                                 '%s ? $entity->%s->format(\'Y-m-d H:i:s.u\') : null',
                                 $voProperty->getGetter(),
                                 $voProperty->getGetter(),
-                            )
+                            ),
                         ),
-                        $voProperty->getType()
+                        $voProperty->getType(),
                     ),
                 ];
             }
@@ -163,14 +163,14 @@ class TableDefinition
                     $voProperty->getName(),
                     'datetime',
                     $voProperty->withGetter(sprintf('%s->format(\'Y-m-d H:i:s.u\')', $voProperty->getGetter())),
-                    $voProperty->getType()
+                    $voProperty->getType(),
                 ),
             ];
         }
 
         $properties = array_map(
             fn (ReflectionParameter $param) => new PropertyDefinition($reflection, $param),
-            $reflection->getConstructor()->getParameters()
+            $reflection->getConstructor()->getParameters(),
         );
 
         if (count($properties) === 1) {
@@ -187,10 +187,10 @@ class TableDefinition
                                 '%s ? $entity->%s->%s : null',
                                 $voProperty->getGetter(),
                                 $voProperty->getGetter(),
-                                $prop->getGetter()
-                            )
+                                $prop->getGetter(),
+                            ),
                         ),
-                        $voProperty->getType()
+                        $voProperty->getType(),
                     ),
                 ];
             }
@@ -201,7 +201,7 @@ class TableDefinition
                     $voProperty->getName(),
                     $prop->getType(),
                     $voProperty->withGetter(sprintf('%s->%s', $voProperty->getGetter(), $prop->getGetter())),
-                    $voProperty->getType()
+                    $voProperty->getType(),
                 ),
             ];
         }
@@ -218,7 +218,7 @@ class TableDefinition
                             $voProperty->getGetter(),
                             $voProperty->getGetter(),
                             $prop->getGetter(),
-                        )
+                        ),
                     ),
                     $voProperty->getType(),
                 );
@@ -231,7 +231,7 @@ class TableDefinition
 
                 $properties = array_map(
                     fn (ReflectionParameter $param) => new PropertyDefinition($class, $param),
-                    $class->getConstructor()->getParameters()
+                    $class->getConstructor()->getParameters(),
                 );
 
                 if (count($properties) > 1) {
@@ -239,6 +239,7 @@ class TableDefinition
                 }
 
                 $vo = current($properties);
+                assert($vo instanceof PropertyDefinition);
 
                 return new TableField(
                     $voProperty->getName(),
@@ -250,7 +251,7 @@ class TableDefinition
                             $voProperty->getGetter(),
                             $prop->getGetter(),
                             $vo->getGetter(),
-                        )
+                        ),
                     ),
                     $voProperty->getType(),
                 );

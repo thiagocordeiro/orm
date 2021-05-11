@@ -23,7 +23,7 @@ class NullablePropertyTest extends IntegrationTestCase
 
         $this->assertEquals(
             new NullableProperty('nnn', null, null, null),
-            $repository->loadById('nnn')
+            $repository->loadById('nnn'),
         );
     }
 
@@ -39,7 +39,7 @@ class NullablePropertyTest extends IntegrationTestCase
 
         $this->assertEquals(
             new NullableProperty('nnn', null, new Height(1.76), null),
-            $repository->loadById('nnn')
+            $repository->loadById('nnn'),
         );
     }
 }

@@ -21,7 +21,7 @@ class Address
         string $number,
         bool $main,
         DateTimeImmutable $createdAt,
-        ?DateTimeImmutable $deletedAt = null
+        ?DateTimeImmutable $deletedAt = null,
     ) {
         $this->id = $id;
         $this->street = $street;

@@ -120,7 +120,7 @@ class PropertyDefinition
 
     private function checkScalarType(string $type): bool
     {
-        return in_array($type, ['int', 'float', 'string', 'bool']);
+        return in_array($type, ['int', 'float', 'string', 'bool'], true);
     }
 
     private function checkArrayType(string $type): bool

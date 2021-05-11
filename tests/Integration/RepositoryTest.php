@@ -105,7 +105,7 @@ class RepositoryTest extends IntegrationTestCase
         $this->assertEquals(
             $this->order,
             $this->repository->databaseRowToEntity(
-                ['id' => 'order-1', 'user_id' => 'user-1', 'total_value' => 300, 'total_currency' => 'EUR']
+                ['id' => 'order-1', 'user_id' => 'user-1', 'total_value' => 300, 'total_currency' => 'EUR'],
             ),
         );
     }

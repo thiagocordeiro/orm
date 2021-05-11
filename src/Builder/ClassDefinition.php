@@ -73,9 +73,9 @@ class ClassDefinition
     {
         try {
             $constructor = $class->getConstructor();
-        } catch (OutOfBoundsException $e) {
+        } catch (OutOfBoundsException) {
             throw new Exception(
-                sprintf('Unable to create ORM repository, %s::__constructor does not exist', $class->getName())
+                sprintf('Unable to create ORM repository, %s::__constructor does not exist', $class->getName()),
             );
         }
 

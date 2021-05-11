@@ -36,7 +36,7 @@ class TableLayoutAnalyzer
         $class = new ClassDefinition($this->class);
         $properties = array_map(
             fn (ReflectionParameter $param) => new PropertyDefinition($this->class, $param),
-            $properties
+            $properties,
         );
 
         return new TableDefinition($class, $this->table, ...$properties);
@@ -47,7 +47,7 @@ class TableLayoutAnalyzer
         return Inflector::get()->underscore(
             $pluralized
                 ? Inflector::get()->pluralize($shortName)
-                : $shortName
+                : $shortName,
         );
     }
 }

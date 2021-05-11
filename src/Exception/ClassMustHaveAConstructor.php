@@ -11,7 +11,7 @@ class ClassMustHaveAConstructor extends Exception
     public function __construct(string $class)
     {
         parent::__construct(
-            sprintf('Class %s must have a constructor', $class)
+            sprintf('Class %s must have a constructor', $class),
         );
     }
 }

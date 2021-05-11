@@ -118,7 +118,7 @@ class RepositoryTemplate
 
         return array_map(
             fn (array $objectField) => $this->prepareArrayFields($objectField),
-            $objectFields
+            $objectFields,
         );
     }
 
@@ -128,9 +128,10 @@ class RepositoryTemplate
     protected function prepareMultiFields(array $objectField): string
     {
         $field = current($objectField);
+        assert($field instanceof TableField);
 
         $subFields = [];
-        $voClass = current($objectField)->getValueObject();
+        $voClass = $field->getValueObject();
 
         foreach ($objectField as $subField) {
             if (false === $subField->isScalar()) {
@@ -167,6 +168,8 @@ class RepositoryTemplate
     private function prepareNormalFields(array $objectField): string
     {
         $field = current($objectField);
+        assert($field instanceof TableField);
+
         $valueObjectClass = $field->getValueObject();
 
         if ($field->isChildList()) {
@@ -178,7 +181,7 @@ class RepositoryTemplate
                     $field->getDefinition()->isVariadic() ? '...' : '',
                     str_replace('[]', '', $field->getDefinition()->getType()),
                     underscore($this->definition->getClass()->getShortName()),
-                )
+                ),
             );
         }
 
@@ -187,7 +190,7 @@ class RepositoryTemplate
                 "%s\$this->em->getRepository(\%s::class)->loadBy(['%s' => \$item['id']])",
                 str_repeat(' ', 12),
                 $field->getDefinition()->getType(),
-                $field->getDefinition()->getChildName()
+                $field->getDefinition()->getChildName(),
             );
         }
 
@@ -198,8 +201,8 @@ class RepositoryTemplate
                 sprintf(
                     "\$this->em->getRepository(\%s::class)->loadById(\$item['%s'])",
                     $field->getDefinition()->getType(),
-                    $field->getName()
-                )
+                    $field->getName(),
+                ),
             );
         }
 
@@ -207,14 +210,14 @@ class RepositoryTemplate
             return $this->prepareNullableArrayProperty(
                 $field,
                 $field->getName(),
-                sprintf("new \%s(%s\$item['%s'])", $valueObjectClass, $field->getCast(), $field->getName())
+                sprintf("new \%s(%s\$item['%s'])", $valueObjectClass, $field->getCast(), $field->getName()),
             );
         }
 
         return $this->prepareNullableArrayProperty(
             $field,
             $field->getName(),
-            sprintf("%s\$item['%s']", $field->getCast(), $field->getName())
+            sprintf("%s\$item['%s']", $field->getCast(), $field->getName()),
         );
     }
 
@@ -243,12 +246,12 @@ class RepositoryTemplate
     {
         $inlineFields = array_map(
             fn (TableField $field) => sprintf("%s:%s", str_repeat(' ', 12), $field->getName()),
-            iterator_to_array($this->definition->getTableFields())
+            iterator_to_array($this->definition->getTableFields()),
         );
 
         $inlineColumns = array_map(
             fn (TableField $field) => sprintf("%s`%s`", str_repeat(' ', 12), $field->getName()),
-            iterator_to_array($this->definition->getTableFields())
+            iterator_to_array($this->definition->getTableFields()),
         );
 
         $fieldValues = array_map(
@@ -256,9 +259,9 @@ class RepositoryTemplate
                 "%s`%s` = :%s",
                 str_repeat(' ', 12),
                 $field->getName(),
-                $field->getName()
+                $field->getName(),
             ),
-            iterator_to_array($this->definition->getTableFields())
+            iterator_to_array($this->definition->getTableFields()),
         );
 
         $bindings = array_map(
@@ -268,7 +271,7 @@ class RepositoryTemplate
                 $field->getName(),
                 $field->getDefinition()->getGetter(),
             ),
-            iterator_to_array($this->definition->getTableFields())
+            iterator_to_array($this->definition->getTableFields()),
         );
 
         $template = self::TEMPLATE;

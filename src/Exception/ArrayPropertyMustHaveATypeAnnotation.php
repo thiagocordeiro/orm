@@ -16,8 +16,8 @@ class ArrayPropertyMustHaveATypeAnnotation extends Exception
             sprintf(
                 'Array property %s::%s must have an array annotation',
                 $class->getName(),
-                $param->getName()
-            )
+                $param->getName(),
+            ),
         );
     }
 }
