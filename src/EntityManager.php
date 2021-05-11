@@ -49,7 +49,13 @@ class EntityManager
         $entityRepository = $entityConfig['repository'] ?? null;
 
         if (null !== $entityRepository) {
-            return $this->repositoryInstance($entityRepository);
+            return new $entityRepository($this->connection, $this);
+        }
+
+        $factory = $entityConfig['factory'] ?? null;
+
+        if (null !== $factory) {
+            return $factory($this->connection, $this);
         }
 
         if (!class_exists($repository)) {
@@ -57,20 +63,6 @@ class EntityManager
         }
 
         return new $repository($this->connection, $this);
-    }
-
-    /**
-     * @template T of object
-     * @param Repository<T>|class-string<T> $entityRepository
-     * @return Repository<T>
-     */
-    private function repositoryInstance(string|Repository $entityRepository): Repository
-    {
-        if (is_string($entityRepository)) {
-            return new $entityRepository($this->connection, $this);
-        }
-
-        return $entityRepository;
     }
 
     /**

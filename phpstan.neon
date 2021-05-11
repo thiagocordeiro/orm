@@ -1,4 +1,3 @@
 parameters:
     excludes_analyse:
         - 'src/Builder/ReflectionClass.php'
-        - 'src/EntityManager.php'
