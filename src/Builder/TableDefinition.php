@@ -92,8 +92,7 @@ class TableDefinition
                         $property->getIdType(),
                         $property->withGetter(
                             sprintf(
-                                '%s ? $entity->%s->getId() : null',
-                                $property->getGetter(),
+                                '%s?->getId()',
                                 $property->getGetter(),
                             ),
                         ),
@@ -147,8 +146,7 @@ class TableDefinition
                         'datetime',
                         $voProperty->withGetter(
                             sprintf(
-                                '%s ? $entity->%s->format(\'Y-m-d H:i:s.u\') : null',
-                                $voProperty->getGetter(),
+                                '%s?->format(\'Y-m-d H:i:s.u\')',
                                 $voProperty->getGetter(),
                             ),
                         ),
@@ -184,8 +182,7 @@ class TableDefinition
                         $prop->getType(),
                         $voProperty->withGetter(
                             sprintf(
-                                '%s ? $entity->%s->%s : null',
-                                $voProperty->getGetter(),
+                                '%s?->%s',
                                 $voProperty->getGetter(),
                                 $prop->getGetter(),
                             ),
@@ -214,8 +211,7 @@ class TableDefinition
                     $prop->getType(),
                     $voProperty->withGetter(
                         sprintf(
-                            '%s ? $entity->%s->%s : null',
-                            $voProperty->getGetter(),
+                            '%s?->%s',
                             $voProperty->getGetter(),
                             $prop->getGetter(),
                         ),
