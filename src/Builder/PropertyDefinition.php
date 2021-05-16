@@ -234,6 +234,12 @@ class PropertyDefinition
             return $this->searchGetterForBoolean($class, $param);
         }
 
+        $numParams = count($class->getConstructor()->getParameters());
+
+        if ($numParams === 1 && $class->hasMethod('__toString')) {
+            return '__toString';
+        }
+
         $getter = sprintf('get%s', ucfirst($param->getName()));
 
         if ($class->hasMethod($getter)) {
@@ -244,12 +250,6 @@ class PropertyDefinition
 
         if ($class->hasMethod($propertyMethod)) {
             return $propertyMethod;
-        }
-
-        $numParams = count($class->getConstructor()->getParameters());
-
-        if ($numParams === 1 && $class->hasMethod('__toString')) {
-            return '__toString';
         }
 
         throw new PropertyHasNoGetter($class, $getter);
