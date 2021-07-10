@@ -162,6 +162,6 @@ abstract class Repository
 
     protected function floatToDbString(?float $value): ?string
     {
-        return $value ? sprintf('%.12f', $value) : null;
+        return $value !== null ? sprintf('%.12f', $value) : null;
     }
 }
