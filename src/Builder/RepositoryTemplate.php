@@ -266,7 +266,11 @@ class RepositoryTemplate
 
         $bindings = array_map(
             fn (TableField $field) => sprintf(
-                "%s'%s' => \$entity->%s" . ($field->isBoolean() ? ' ? 1 : 0' : ''),
+                match ($field->getType()) {
+                    'bool' => "%s'%s' => \$entity->%s ? 1 : 0",
+                    'float' => "%s'%s' => \$this->floatToDbString(\$entity->%s)",
+                    default => "%s'%s' => \$entity->%s",
+                },
                 str_repeat(' ', 12),
                 $field->getName(),
                 $field->getDefinition()->getGetter(),

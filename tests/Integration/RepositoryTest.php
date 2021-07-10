@@ -60,7 +60,7 @@ class RepositoryTest extends IntegrationTestCase
         $this->order = new Order(
             'order-1',
             $user,
-            new Amount(300, Currency::EUR()),
+            new Amount(1.0e-5, Currency::EUR()),
             [new OrderProduct(1, 'order-1', new Product('product-001', $this->price), $this->price)],
             [new OrderStore('store-xxx', 'order-1', 'Store XXX')],
         );
@@ -89,7 +89,12 @@ class RepositoryTest extends IntegrationTestCase
     public function testEntityToDatabaseRow(): void
     {
         $this->assertEquals(
-            ['id' => 'order-1', 'user_id' => 'user-1', 'total_value' => 300, 'total_currency' => 'EUR'],
+            [
+                'id' => 'order-1',
+                'user_id' => 'user-1',
+                'total_value' => '0.000010000000',
+                'total_currency' => 'EUR',
+            ],
             $this->repository->entityToDatabaseRow($this->order),
         );
     }
@@ -105,7 +110,12 @@ class RepositoryTest extends IntegrationTestCase
         $this->assertEquals(
             $this->order,
             $this->repository->databaseRowToEntity(
-                ['id' => 'order-1', 'user_id' => 'user-1', 'total_value' => 300, 'total_currency' => 'EUR'],
+                [
+                    'id' => 'order-1',
+                    'user_id' => 'user-1',
+                    'total_value' => '0.000010000000',
+                    'total_currency' => 'EUR',
+                ],
             ),
         );
     }

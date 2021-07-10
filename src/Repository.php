@@ -159,4 +159,9 @@ abstract class Repository
             $this->connection->execute($statement, $this->getDeleteCriteria($entity));
         }
     }
+
+    protected function floatToDbString(?float $value): ?string
+    {
+        return $value ? sprintf('%.12f', $value) : null;
+    }
 }
