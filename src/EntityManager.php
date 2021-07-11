@@ -14,6 +14,8 @@ class EntityManager
     private Connection $connection;
     private string $cacheDir;
     private bool $pluralize;
+    private ?string $fileUser;
+    private ?string $fileGroup;
 
     /** @var mixed[] */
     private array $entityConfig;
@@ -21,12 +23,20 @@ class EntityManager
     /**
      * @param mixed[] $entityConfig
      */
-    public function __construct(Connection $connection, string $cacheDir, bool $pluralize, array $entityConfig = [])
-    {
+    public function __construct(
+        Connection $connection,
+        string $cacheDir,
+        bool $pluralize,
+        array $entityConfig = [],
+        ?string $fileUser = null,
+        ?string $fileGroup = null,
+    ) {
         $this->connection = $connection;
         $this->cacheDir = $cacheDir;
         $this->pluralize = $pluralize;
         $this->entityConfig = $entityConfig;
+        $this->fileUser = $fileUser;
+        $this->fileGroup = $fileGroup;
     }
 
     public function getConnection(): Connection
@@ -94,7 +104,36 @@ class EntityManager
         $definition = (new TableLayoutAnalyzer($class, $this->pluralize, $table))->analyze();
         $template = new RepositoryTemplate($definition, $repositoryName, $config);
 
-        is_dir($this->cacheDir) ?: mkdir($this->cacheDir, 0777, true);
+        if (false === is_dir($this->cacheDir)) {
+            mkdir($this->cacheDir, 0777, true);
+            $this->fixPermission($this->cacheDir);
+        }
+
         file_put_contents($filePath, (string) $template);
+        $this->fixPermission($filePath);
+    }
+
+    private function fixPermission(string $path): void
+    {
+        $this->fixUserPermission($path);
+        $this->fixGroupPermission($path);
+    }
+
+    private function fixUserPermission(string $path): void
+    {
+        if (null === $this->fileUser) {
+            return;
+        }
+
+        chown($path, $this->fileUser);
+    }
+
+    private function fixGroupPermission(string $path): void
+    {
+        if (null === $this->fileGroup) {
+            return;
+        }
+
+        chgrp($path, $this->fileGroup);
     }
 }
