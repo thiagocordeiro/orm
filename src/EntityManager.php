@@ -98,6 +98,7 @@ class EntityManager
      */
     private function createRepository(string $filePath, string $repositoryName, string $class): void
     {
+        umask(0002);
         $config = $this->entityConfig[$class] ?? [];
         $table = $config['table'] ?? null;
 
