@@ -92,7 +92,7 @@ class RepositoryTest extends IntegrationTestCase
             [
                 'id' => 'order-1',
                 'user_id' => 'user-1',
-                'total_value' => '0.000010000000',
+                'total_value' => '0.0000100000',
                 'total_currency' => 'EUR',
             ],
             $this->repository->entityToDatabaseRow($this->order),
@@ -113,7 +113,7 @@ class RepositoryTest extends IntegrationTestCase
                 [
                     'id' => 'order-1',
                     'user_id' => 'user-1',
-                    'total_value' => '0.000010000000',
+                    'total_value' => '0.0000100000',
                     'total_currency' => 'EUR',
                 ],
             ),
