@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Orm\Config;
 
+use Orm\Builder\RepositoryResolver;
 use Orm\Connection;
 use Orm\EntityManager;
 use PHPUnit\Framework\TestCase;
@@ -26,9 +27,11 @@ class IntegrationTestCase extends TestCase
 
         $this->em = new EntityManager(
             $connection,
-            'var/cache/orm/',
-            true,
-            [PaymentStatus::class => ['table' => 'payment_status', 'order' => ['at' => 'desc']]],
+            new RepositoryResolver(
+                'var/cache/orm/',
+                true,
+                [PaymentStatus::class => ['table' => 'payment_status', 'order' => ['at' => 'desc']]],
+            ),
         );
     }
 }

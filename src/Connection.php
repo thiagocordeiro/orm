@@ -48,6 +48,7 @@ class Connection
     /**
      * @param array<string, string|int|float|bool|null> $where
      * @param array<string, string> $order
+     * @return PDOStatement<mixed>
      * @throws Throwable
      */
     public function select(
@@ -157,6 +158,7 @@ class Connection
 
     /**
      * @param array<string|int, string|int|float|bool|null> $params
+     * @return PDOStatement<mixed>
      */
     public function execute(string $statement, array $params = []): PDOStatement
     {
