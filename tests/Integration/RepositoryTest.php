@@ -129,4 +129,43 @@ class RepositoryTest extends IntegrationTestCase
         $this->assertTrue($repository->exists(['id' => 'user-1']));
         $this->assertFalse($repository->exists(['id' => 'foo-bar']));
     }
+
+    public function testLoadByQuery(): void
+    {
+        $repository = $this->em->getRepository(Product::class);
+        $repository->insert(
+            new Product('product-001', $this->price),
+            new Product('product-002', $this->price),
+            new Product('product-xxx', $this->price),
+            new Product('product-003', $this->price),
+        );
+
+        $product1 = $repository->loadByQuery('select * from products where id = :id', ['id' => 'product-xxx']);
+        $product2 = $repository->loadByQuery('select * from products where id = :id', ['id' => 'product-abc']);
+
+        $this->assertEquals(new Product('product-xxx', $this->price), $product1);
+        $this->assertNull($product2);
+    }
+
+    public function testSelectByQuery(): void
+    {
+        $repository = $this->em->getRepository(Product::class);
+        $repository->insert(
+            new Product('product-001', $this->price),
+            new Product('product-002', $this->price),
+            new Product('product-xxx', $this->price),
+            new Product('product-003', $this->price),
+        );
+
+        $products = $repository->selectByQuery('select * from products where id like :id', ['id' => 'product-00%']);
+
+        $this->assertEquals(
+            [
+                new Product('product-001', $this->price),
+                new Product('product-002', $this->price),
+                new Product('product-003', $this->price),
+            ],
+            iterator_to_array($products),
+        );
+    }
 }

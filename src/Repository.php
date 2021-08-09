@@ -71,6 +71,21 @@ abstract class Repository
     }
 
     /**
+     * @param array<string, string|int|float|bool|null> $bindings
+     * @return T|null
+     */
+    public function loadByQuery(string $query, array $bindings = []): ?object
+    {
+        $item = $this->connection->execute($query, $bindings)->fetch();
+
+        if (!$item) {
+            return null;
+        }
+
+        return $this->databaseRowToEntity($item);
+    }
+
+    /**
      * @param array<string, string|int|float|bool|null> $where
      */
     public function exists(array $where = []): bool
@@ -112,6 +127,19 @@ abstract class Repository
         }
 
         return $this->databaseRowToEntity($item);
+    }
+
+    /**
+     * @param array<string, string|int|float|bool|null> $bindings
+     * @return Traversable<T>
+     */
+    public function selectByQuery(string $query, array $bindings = []): Traversable
+    {
+        $items = $this->connection->execute($query, $bindings);
+
+        foreach ($items as $item) {
+            yield $this->databaseRowToEntity($item);
+        }
     }
 
     /**
