@@ -45,6 +45,11 @@ class Connection
         return $this->pdo;
     }
 
+    public function dsn(): string
+    {
+        return $this->dsn;
+    }
+
     /**
      * @param array<string, string|int|float|bool|null> $where
      * @param array<string, string> $order
