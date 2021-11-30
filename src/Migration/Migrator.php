@@ -29,7 +29,10 @@ class Migrator
     public function migrate(): Traversable
     {
         $files = glob("{$this->directory}/*.php");
-        assert(!empty($files));
+
+        if (empty($files)) {
+            return;
+        }
 
         $this->createMigrationTableIfNeeded();
 
