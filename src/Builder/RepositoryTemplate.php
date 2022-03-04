@@ -6,6 +6,14 @@ namespace Orm\Builder;
 
 use function ICanBoogie\underscore;
 
+/**
+ * @phpstan-type EntityConfig array{
+ *      factory: ?callable,
+ *      repository: ?class-string,
+ *      table: ?string,
+ *      order: ?array<string, string>,
+ * }
+ */
 class RepositoryTemplate
 {
     private const TEMPLATE = <<<'PHP'
@@ -92,11 +100,11 @@ class RepositoryTemplate
     private TableDefinition $definition;
     private string $repositoryName;
 
-    /** @var mixed[] */
+    /** @var EntityConfig */
     private array $config;
 
     /**
-     * @param mixed[] $config
+     * @param EntityConfig $config
      */
     public function __construct(TableDefinition $definition, string $repositoryName, array $config)
     {

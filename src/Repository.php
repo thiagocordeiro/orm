@@ -30,13 +30,13 @@ abstract class Repository
 
     /**
      * @param T $entity
-     * @return array<string, mixed>
+     * @return array<string, bool|float|int|string|null>
      */
     abstract public function getDeleteCriteria(object $entity): array;
 
     /**
      * @param T $entity
-     * @return array<string, mixed>
+     * @return array<string, bool|float|int|string|null>
      */
     abstract public function entityToDatabaseRow(object $entity): array;
 
@@ -78,7 +78,7 @@ abstract class Repository
     {
         $item = $this->connection->execute($query, $bindings)->fetch();
 
-        if (!$item) {
+        if (false === is_array($item)) {
             return null;
         }
 

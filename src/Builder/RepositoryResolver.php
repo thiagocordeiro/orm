@@ -8,18 +8,33 @@ use Orm\Connection;
 use Orm\EntityManager;
 use Throwable;
 
+/**
+ * @phpstan-type EntityConfig array{
+ *      factory: ?callable,
+ *      repository: ?class-string,
+ *      table: ?string,
+ *      order: ?array<string, string>,
+ * }
+ */
 class RepositoryResolver
 {
+    private const EMPTY_ENTITY_CONFIG = [
+        'factory' => null,
+        'repository' => null,
+        'table' => null,
+        'order' => null,
+    ];
+
     private string $cacheDir;
     private bool $pluralize;
     private ?string $fileUser;
     private ?string $fileGroup;
 
-    /** @var mixed[] */
+    /** @var array<class-string, EntityConfig> */
     private array $entityConfig;
 
     /**
-     * @param mixed[] $entityConfig
+     * @param array<class-string, EntityConfig> $entityConfig
      */
     public function __construct(
         string $cacheDir,
@@ -41,7 +56,7 @@ class RepositoryResolver
      */
     public function resolve(string $class): callable
     {
-        $config = $this->entityConfig[$class] ?? [];
+        $config = $this->entityConfig[$class] ?? self::EMPTY_ENTITY_CONFIG;
         $factory = $config['factory'] ?? null;
 
         if (null !== $factory) {
@@ -79,7 +94,7 @@ class RepositoryResolver
      */
     private function createRepository(string $path, string $name, string $class): void
     {
-        $config = $this->entityConfig[$class] ?? [];
+        $config = $this->entityConfig[$class] ?? self::EMPTY_ENTITY_CONFIG;
 
         umask(0002);
         $table = $config['table'] ?? null;

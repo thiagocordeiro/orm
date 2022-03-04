@@ -36,10 +36,7 @@ class Connection
     public function pdo(): PDO
     {
         if (null === $this->pdo) {
-            $this->pdo = new PDO($this->dsn, $this->user, $this->password, $this->options);
-            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-            $this->pdo->setAttribute(PDO::MYSQL_ATTR_INIT_COMMAND, 'SET NAMES utf8');
+            $this->pdo = $this->initPdo();
         }
 
         return $this->pdo;
@@ -233,6 +230,20 @@ class Connection
         $this->pdo = null;
     }
 
+    private function initPdo(): PDO
+    {
+        $pdo = new PDO($this->dsn, $this->user, $this->password, $this->options);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+
+        match ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+            'mysql' => $pdo->setAttribute(PDO::MYSQL_ATTR_INIT_COMMAND, 'SET NAMES utf8'),
+            default => null,
+        };
+
+        return $pdo;
+    }
+
     private function supportsNestedTransaction(): bool
     {
         return in_array($this->pdo()->getAttribute(PDO::ATTR_DRIVER_NAME), ['mysql', 'pgsql'], true);
@@ -240,7 +251,7 @@ class Connection
 
     /**
      * @param array<string, string|int|float|bool|null> $conditions
-     * @return mixed[]
+     * @return array{0: string, 1: array<string, string|int|float|bool|null>}
      */
     private function getWhere(array $conditions): array
     {

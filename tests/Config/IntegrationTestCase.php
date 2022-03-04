@@ -19,18 +19,20 @@ class IntegrationTestCase extends TestCase
         $path = __DIR__ . '/../../var/';
         $file = "{$path}test.sqlite";
 
-        is_dir($path) ?: mkdir($path, 0777, true);
+        is_dir($path) || mkdir($path, 0777, true);
         file_put_contents($file, '');
 
         $connection = new Connection(sprintf('sqlite:%s', $file));
         $connection->exec((string) file_get_contents(__DIR__ . '/../Fixture/database.sql'));
 
         $this->em = new EntityManager(
-            $connection,
-            new RepositoryResolver(
-                'var/cache/orm/',
-                true,
-                [PaymentStatus::class => ['table' => 'payment_status', 'order' => ['at' => 'desc']]],
+            connection: $connection,
+            resolver: new RepositoryResolver(
+                cacheDir: 'var/cache/orm/',
+                pluralize: true,
+                entityConfig: [
+                    PaymentStatus::class => ['table' => 'payment_status', 'order' => ['at' => 'desc']],
+                ],
             ),
         );
     }

@@ -1,4 +1,4 @@
 parameters:
-    excludes_analyse:
+    excludePaths:
         - 'src/Builder/ReflectionClass.php'
         - 'src/RepositoryFactory.php'
