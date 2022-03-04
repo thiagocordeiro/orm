@@ -108,7 +108,7 @@ class RepositoryResolver
             return;
         }
 
-        chown($path, $this->fileUser);
+        @chown($path, $this->fileUser);
     }
 
     private function fixGroupPermission(string $path): void
@@ -117,6 +117,6 @@ class RepositoryResolver
             return;
         }
 
-        chgrp($path, $this->fileGroup);
+        @chgrp($path, $this->fileGroup);
     }
 }
