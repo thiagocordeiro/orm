@@ -64,6 +64,10 @@ class PropertyDefinition
 
     public function getGetter(): string
     {
+        if ($this->isEnum()) {
+            return "{$this->getter}->value";
+        }
+
         return $this->getter;
     }
 
@@ -84,30 +88,31 @@ class PropertyDefinition
 
     public function isEntity(): bool
     {
-        return $this->class
-            ? $this->class->isEntity()
-            : false;
+        return $this->class && $this->class->isEntity();
+    }
+
+    public function isEnum(): bool
+    {
+        if ($this->class === null && class_exists($this->type)) {
+            return EnumAnalyzer::isEnum($this->type);
+        }
+
+        return false;
     }
 
     public function isChild(): bool
     {
-        return $this->class
-            ? $this->class->isChild()
-            : false;
+        return $this->class && $this->class->isChild();
     }
 
     public function getChildName(): ?string
     {
-        return $this->class
-            ? $this->class->getChildName()
-            : null;
+        return $this->class?->getChildName();
     }
 
     public function isValueObject(): bool
     {
-        return $this->class
-            ? $this->class->isValueObject()
-            : false;
+        return $this->class && $this->class->isValueObject();
     }
 
     public function withGetter(string $getter): self
@@ -125,7 +130,7 @@ class PropertyDefinition
 
     private function checkArrayType(string $type): bool
     {
-        return $type === 'array' || false !== strpos($type, '[]');
+        return $type === 'array' || str_contains($type, '[]');
     }
 
     /**
@@ -287,6 +292,10 @@ class PropertyDefinition
     private function getClassDefinitionByType(string $type, ReflectionClass $parent): ?ClassDefinition
     {
         if ($this->checkScalarType($type) || $this->checkArrayType($type)) {
+            return null;
+        }
+
+        if (EnumAnalyzer::isEnum($type)) {
             return null;
         }
 

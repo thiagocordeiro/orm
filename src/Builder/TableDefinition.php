@@ -117,7 +117,13 @@ class TableDefinition
                 continue;
             }
 
-            $array[] = new TableField($property->getName(), $property->getName(), $property->getType(), $property);
+            $array[] = new TableField(
+                objectField: $property->getName(),
+                name: $property->getName(),
+                type: $property->getType(),
+                definition: $property,
+                enum: $property->isEnum(),
+            );
         }
 
         return new ArrayObject($array);

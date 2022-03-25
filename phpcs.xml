@@ -55,6 +55,11 @@
         <exclude name="SlevomatCodingStandard.Functions.DisallowNamedArguments.DisallowedNamedArgument"/>
         <exclude name="SlevomatCodingStandard.ControlStructures.DisallowNullSafeObjectOperator.DisallowedNullSafeObjectOperator"/>
         <exclude name="SlevomatCodingStandard.Classes.DisallowLateStaticBindingForConstants.DisallowedLateStaticBindingForConstant"/>
+
+        <!-- enum compatibility -->
+        <exclude name="Generic.WhiteSpace.ScopeIndent.IncorrectExact"/>
+        <exclude name="Generic.WhiteSpace.ScopeIndent.Incorrect"/>
+        <!-- enum compatibility -->
     </rule>
 
     <rule ref="Generic.Files.LineLength.TooLong">

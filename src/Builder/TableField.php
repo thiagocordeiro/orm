@@ -24,6 +24,7 @@ class TableField
     private ?string $valueObject;
     private bool $childList;
     private bool $child;
+    private bool $enum;
 
     /**
      * @throws Throwable
@@ -36,6 +37,7 @@ class TableField
         ?string $valueObject = null,
         bool $childList = false,
         bool $child = false,
+        bool $enum = false,
     ) {
         $this->objectField = $objectField;
         $this->name = Inflector::get()->underscore($name);
@@ -44,6 +46,7 @@ class TableField
         $this->valueObject = $valueObject;
         $this->childList = $childList;
         $this->child = $child;
+        $this->enum = $enum;
     }
 
     public function getObjectField(): string
@@ -67,6 +70,10 @@ class TableField
             return '';
         }
 
+        if ($this->enum) {
+            return sprintf('\%s::from', $this->type);
+        }
+
         return sprintf('(%s) ', $this->type);
     }
 
@@ -88,6 +95,11 @@ class TableField
     public function isChildList(): bool
     {
         return $this->childList;
+    }
+
+    public function isEnum(): bool
+    {
+        return $this->enum;
     }
 
     public function isChild(): bool

@@ -222,6 +222,14 @@ class RepositoryTemplate
             );
         }
 
+        if ($field->isEnum()) {
+            return $this->prepareNullableArrayProperty(
+                $field,
+                $field->getName(),
+                sprintf("%s(\$item['%s'])", $field->getCast(), $field->getName()),
+            );
+        }
+
         return $this->prepareNullableArrayProperty(
             $field,
             $field->getName(),

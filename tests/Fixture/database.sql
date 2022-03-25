@@ -72,3 +72,9 @@ create table payment_status
     at         datetime
 );
 
+create table bank_accounts
+(
+    id     varchar(255) not null,
+    number varchar(255) not null,
+    type   varchar(255) not null
+);

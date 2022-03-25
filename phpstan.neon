@@ -1,4 +1,5 @@
 parameters:
     excludePaths:
-        - 'src/Builder/ReflectionClass.php'
-        - 'src/RepositoryFactory.php'
+        - src/Builder/EnumAnalyzer.php
+        - src/Builder/ReflectionClass.php
+        - src/RepositoryFactory.php
