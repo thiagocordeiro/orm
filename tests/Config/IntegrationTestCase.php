@@ -9,6 +9,7 @@ use Orm\Connection;
 use Orm\EntityManager;
 use PHPUnit\Framework\TestCase;
 use Test\Orm\Fixture\Entity\PaymentStatus;
+use Test\Orm\Fixture\Entity\Post;
 
 class IntegrationTestCase extends TestCase
 {
@@ -32,6 +33,7 @@ class IntegrationTestCase extends TestCase
                 pluralize: true,
                 entityConfig: [
                     PaymentStatus::class => ['table' => 'payment_status', 'order' => ['at' => 'desc']],
+                    Post::class => ['table' => 'posts', 'soft_delete' => 'true'],
                 ],
             ),
         );

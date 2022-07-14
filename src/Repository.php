@@ -16,6 +16,8 @@ abstract class Repository
 
     abstract public function getTable(): string;
 
+    abstract public function isSoftDelete(): bool;
+
     /**
      * @param array<string, string> $order
      * @return array<string, string>
@@ -33,6 +35,12 @@ abstract class Repository
      * @return array<string, bool|float|int|string|null>
      */
     abstract public function getDeleteCriteria(object $entity): array;
+
+    /**
+     * @param T $entity
+     * @return array<string, bool|float|int|string|null>
+     */
+    abstract public function getSoftDeleteCriteria(object $entity): array;
 
     /**
      * @param T $entity
@@ -104,7 +112,13 @@ abstract class Repository
      */
     public function select(array $where = [], array $order = [], ?int $limit = null, ?int $offset = null): Traversable
     {
-        $items = $this->connection->select($this->getTable(), $where, $this->getOrder($order), $limit, $offset);
+        $items = $this->connection->select(
+            $this->getTable(),
+            $this->getWhere($where),
+            $this->getOrder($order),
+            $limit,
+            $offset,
+        );
 
         foreach ($items as $item) {
             yield $this->databaseRowToEntity($item);
@@ -181,6 +195,20 @@ abstract class Repository
      */
     public function delete(object ...$entities): void
     {
+        if ($this->isSoftDelete()) {
+            $statement = "
+                UPDATE {$this->getTable()} SET
+                    `deleted_at` = :at
+                WHERE id = :id  
+            ";
+
+            foreach ($entities as $entity) {
+                $this->connection->execute($statement, $this->getSoftDeleteCriteria($entity));
+            }
+
+            return;
+        }
+
         $statement = "DELETE FROM {$this->getTable()} WHERE id = :id";
 
         foreach ($entities as $entity) {
@@ -191,5 +219,18 @@ abstract class Repository
     protected function floatToDbString(?float $value): ?string
     {
         return $value !== null ? sprintf('%.10f', $value) : null;
+    }
+
+    /**
+     * @param array<string, string|int|float|bool|null> $where
+     * @return array<string, string|int|float|bool|null>
+     */
+    private function getWhere(array $where): array
+    {
+        if ($this->isSoftDelete()) {
+            return array_merge($where, ['deleted_at' => null]);
+        }
+
+        return $where;
     }
 }
