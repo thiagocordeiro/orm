@@ -198,7 +198,7 @@ abstract class Repository
         if ($this->isSoftDelete()) {
             $statement = "
                 UPDATE {$this->getTable()} SET
-                    `deleted_at` = :at
+                    `deleted_at` = :deleted_at
                 WHERE id = :id  
             ";
 

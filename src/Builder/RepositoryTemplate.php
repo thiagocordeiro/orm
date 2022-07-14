@@ -86,7 +86,7 @@ class RepositoryTemplate
         {
             $now = new \DateTimeImmutable();
         
-            return ['id' => $entity->getId(), 'at' => $now->format('Y-m-d H:i:s.u')];
+            return ['id' => $entity->getId(), 'deleted_at' => $now->format('Y-m-d H:i:s.u')];
         }
         
         /**

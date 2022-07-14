@@ -14,6 +14,7 @@ use Test\Orm\Fixture\Entity\Post;
 class IntegrationTestCase extends TestCase
 {
     protected EntityManager $em;
+    private ?Connection $connection = null;
 
     protected function setUp(): void
     {
@@ -37,5 +38,18 @@ class IntegrationTestCase extends TestCase
                 ],
             ),
         );
+    }
+
+    protected function connection(): Connection
+    {
+        $path = __DIR__ . '/../../var/';
+        $file = "{$path}test.sqlite";
+
+        if ($this->connection === null) {
+            $this->connection = new Connection(sprintf('sqlite:%s', $file));
+            $this->connection->exec((string) file_get_contents(__DIR__ . '/../Fixture/database.sql'));
+        }
+
+        return $this->connection;
     }
 }
