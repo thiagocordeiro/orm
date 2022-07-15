@@ -78,3 +78,11 @@ create table bank_accounts
     number varchar(255) not null,
     type   varchar(255) not null
 );
+
+create table posts
+(
+    id         varchar(255) not null,
+    title      varchar(255) not null,
+    created_at datetime     not null,
+    deleted_at datetime
+);

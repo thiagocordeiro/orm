@@ -42,5 +42,10 @@
       "@test:stan",
       "@test:int"
     ]
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": false
+    }
   }
 }
