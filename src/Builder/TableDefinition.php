@@ -73,7 +73,7 @@ class TableDefinition
             if ($property->isArray() || $property->isChild()) {
                 $array[] = new TableField(
                     $property->getName(),
-                    $property->getName(),
+                    $property->getFieldName(),
                     'string',
                     $property,
                     null,
@@ -88,7 +88,7 @@ class TableDefinition
                 if ($property->isNullable()) {
                     $array[] = new TableField(
                         $property->getName(),
-                        sprintf('%s_id', $property->getName()),
+                        sprintf('%s_id', $property->getFieldName()),
                         $property->getIdType(),
                         $property->withGetter(
                             sprintf(
@@ -103,7 +103,7 @@ class TableDefinition
 
                 $array[] = new TableField(
                     $property->getName(),
-                    sprintf('%s_id', $property->getName()),
+                    sprintf('%s_id', $property->getFieldName()),
                     $property->getIdType(),
                     $property->withGetter(sprintf('%s->getId()', $property->getGetter())),
                 );
@@ -119,7 +119,7 @@ class TableDefinition
 
             $array[] = new TableField(
                 objectField: $property->getName(),
-                name: $property->getName(),
+                name: $property->getFieldName(),
                 type: $property->getType(),
                 definition: $property,
                 enum: $property->isEnum(),
@@ -148,7 +148,7 @@ class TableDefinition
                 return [
                     new TableField(
                         $voProperty->getName(),
-                        $voProperty->getName(),
+                        $voProperty->getFieldName(),
                         'datetime',
                         $voProperty->withGetter(
                             sprintf(
@@ -164,7 +164,7 @@ class TableDefinition
             return [
                 new TableField(
                     $voProperty->getName(),
-                    $voProperty->getName(),
+                    $voProperty->getFieldName(),
                     'datetime',
                     $voProperty->withGetter(sprintf('%s->format(\'Y-m-d H:i:s.u\')', $voProperty->getGetter())),
                     $voProperty->getType(),
@@ -184,7 +184,7 @@ class TableDefinition
                 return [
                     new TableField(
                         $voProperty->getName(),
-                        $voProperty->getName(),
+                        $voProperty->getFieldName(),
                         $prop->getType(),
                         $voProperty->withGetter(
                             sprintf(
@@ -201,7 +201,7 @@ class TableDefinition
             return [
                 new TableField(
                     $voProperty->getName(),
-                    $voProperty->getName(),
+                    $voProperty->getFieldName(),
                     $prop->getType(),
                     $voProperty->withGetter(sprintf('%s->%s', $voProperty->getGetter(), $prop->getGetter())),
                     $voProperty->getType(),
@@ -213,7 +213,7 @@ class TableDefinition
             if ($voProperty->isNullable()) {
                 return new TableField(
                     $voProperty->getName(),
-                    sprintf('%s_%s', $voProperty->getName(), $prop->getName()),
+                    sprintf('%s_%s', $voProperty->getFieldName(), $prop->getName()),
                     $prop->getType(),
                     $voProperty->withGetter(
                         sprintf(
@@ -245,7 +245,7 @@ class TableDefinition
 
                 return new TableField(
                     $voProperty->getName(),
-                    sprintf('%s_%s', $voProperty->getName(), $prop->getName()),
+                    sprintf('%s_%s', $voProperty->getFieldName(), $prop->getName()),
                     $prop->getType(),
                     $voProperty->withGetter(
                         sprintf(
@@ -261,7 +261,7 @@ class TableDefinition
 
             return new TableField(
                 $voProperty->getName(),
-                sprintf('%s_%s', $voProperty->getName(), $prop->getName()),
+                sprintf('%s_%s', $voProperty->getFieldName(), $prop->getName()),
                 $prop->getType(),
                 $voProperty->withGetter(sprintf('%s->%s', $voProperty->getGetter(), $prop->getGetter())),
                 $voProperty->getType(),

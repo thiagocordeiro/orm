@@ -8,6 +8,7 @@ use Orm\Builder\RepositoryResolver;
 use Orm\Connection;
 use Orm\EntityManager;
 use PHPUnit\Framework\TestCase;
+use Test\Orm\Fixture\Entity\AccountHolder;
 use Test\Orm\Fixture\Entity\PaymentStatus;
 
 class IntegrationTestCase extends TestCase
@@ -32,6 +33,10 @@ class IntegrationTestCase extends TestCase
                 pluralize: true,
                 entityConfig: [
                     PaymentStatus::class => ['table' => 'payment_status', 'order' => ['at' => 'desc']],
+                    AccountHolder::class => [
+                        'table' => 'users',
+                        'columns' => ['emailAddress' => 'email', 'enabled' => 'active'],
+                    ],
                 ],
             ),
         );

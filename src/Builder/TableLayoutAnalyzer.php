@@ -14,16 +14,21 @@ class TableLayoutAnalyzer
     private ReflectionClass $class;
     private string $table;
 
+    /** @var array<string, string> */
+    private array $columns;
+
     /**
      * @param class-string $className
+     * @param array<string, string> $columns
      * @throws ReflectionException
      */
-    public function __construct(string $className, bool $pluralized, ?string $table = null)
+    public function __construct(string $className, bool $pluralized, ?string $table = null, array $columns = [])
     {
         $class = new ReflectionClass($className);
 
         $this->class = $class;
         $this->table = $table ?? $this->resolveTableName($this->class->getShortName(), $pluralized);
+        $this->columns = $columns;
     }
 
     /**
@@ -35,7 +40,11 @@ class TableLayoutAnalyzer
 
         $class = new ClassDefinition($this->class);
         $properties = array_map(
-            fn (ReflectionParameter $param) => new PropertyDefinition($this->class, $param),
+            function (ReflectionParameter $param) {
+                $name = $param->getName();
+
+                return new PropertyDefinition($this->class, $param, $this->columns[$name] ?? null);
+            },
             $properties,
         );
 
