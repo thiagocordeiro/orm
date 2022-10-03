@@ -54,7 +54,7 @@ class PropertyDefinition
     {
         return $this->type;
     }
-    
+
     public function getIdType(): string
     {
         $class = $this->class

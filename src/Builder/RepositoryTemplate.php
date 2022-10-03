@@ -12,6 +12,7 @@ use function ICanBoogie\underscore;
  *      repository: ?class-string,
  *      table: ?string,
  *      order: ?array<string, string>,
+ *      soft_delete: ?string,
  * }
  */
 class RepositoryTemplate
@@ -32,6 +33,11 @@ class RepositoryTemplate
         public function getTable(): string
         {
             return '_table_name_';
+        }
+        
+        public function isSoftDelete(): bool
+        {
+            return _soft_delete_;
         }
         
         /**
@@ -70,6 +76,17 @@ class RepositoryTemplate
         public function getDeleteCriteria(object $entity): array
         {
             return ['id' => $entity->getId()];
+        }
+        
+        /**
+         * @inheritDoc
+         * @param _entity_name_ $entity
+         */
+        public function getSoftDeleteCriteria(object $entity) : array
+        {
+            $now = new \DateTimeImmutable();
+        
+            return ['id' => $entity->getId(), 'deleted_at' => $now->format('Y-m-d H:i:s.u')];
         }
         
         /**
@@ -258,6 +275,11 @@ class RepositoryTemplate
         return sprintf('[%s]', implode(', ', $ordering));
     }
 
+    private function getSoftDelete(): string
+    {
+        return $this->config['soft_delete'] ?? 'false';
+    }
+
     public function __toString(): string
     {
         $inlineFields = array_map(
@@ -305,6 +327,7 @@ class RepositoryTemplate
         $template = str_replace('_table_name_', $this->definition->getTableName(), $template);
         $template = str_replace('_bindings_', trim(implode(",\n", $inlineFields)), $template);
         $template = str_replace('_columns_', trim(implode(",\n", $inlineColumns)), $template);
+        $template = str_replace('_soft_delete_', $this->getSoftDelete(), $template);
 
         return $template;
     }

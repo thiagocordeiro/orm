@@ -15,6 +15,7 @@ use Throwable;
  *      table: ?string,
  *      order: ?array<string, string>,
  *      columns: ?array<string, string>,
+ *      soft_delete: ?string,
  * }
  */
 class RepositoryResolver
@@ -25,6 +26,7 @@ class RepositoryResolver
         'table' => null,
         'order' => null,
         'columns' => null,
+        'soft_delete' => null,
     ];
 
     private string $cacheDir;
