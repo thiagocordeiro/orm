@@ -23,11 +23,12 @@ class PropertyDefinition
     private string $type;
     private string $getter;
     private ?ClassDefinition $class;
+    private ?string $column;
 
     /**
      * @throws Throwable
      */
-    public function __construct(ReflectionClass $class, ReflectionParameter $param)
+    public function __construct(ReflectionClass $class, ReflectionParameter $param, ?string $column = null)
     {
         $this->name = $param->getName();
         $this->variadic = $param->isVariadic();
@@ -36,11 +37,17 @@ class PropertyDefinition
         $this->class = $this->getClassDefinitionByType(str_replace('[]', '', $this->type), $class);
         $this->getter = sprintf('%s()', $this->searchParamGetter($class, $param, $this->type));
         $this->array = $this->checkArrayType($this->type) || $this->variadic;
+        $this->column = $column;
     }
 
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function getFieldName(): string
+    {
+        return $this->column ?? $this->name;
     }
 
     public function getType(): string

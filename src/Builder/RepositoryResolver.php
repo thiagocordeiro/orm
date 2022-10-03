@@ -14,6 +14,7 @@ use Throwable;
  *      repository: ?class-string,
  *      table: ?string,
  *      order: ?array<string, string>,
+ *      columns: ?array<string, string>,
  *      soft_delete: ?string,
  * }
  */
@@ -24,6 +25,7 @@ class RepositoryResolver
         'repository' => null,
         'table' => null,
         'order' => null,
+        'columns' => null,
         'soft_delete' => null,
     ];
 
@@ -100,8 +102,9 @@ class RepositoryResolver
 
         umask(0002);
         $table = $config['table'] ?? null;
+        $columns = $config['columns'] ?? [];
 
-        $definition = (new TableLayoutAnalyzer($class, $this->pluralize, $table))->analyze();
+        $definition = (new TableLayoutAnalyzer($class, $this->pluralize, $table, $columns))->analyze();
         $template = new RepositoryTemplate($definition, $name, $config);
 
         if (false === is_dir($this->cacheDir)) {
